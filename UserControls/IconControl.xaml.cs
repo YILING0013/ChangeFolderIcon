@@ -38,6 +38,14 @@ namespace ChangeFolderIcon.UserControls
         public static readonly DependencyProperty IconProperty =
             DependencyProperty.Register(nameof(Icon), typeof(IconInfo), typeof(IconControl), new PropertyMetadata(null));
 
+        private async void Root_DragStarting(UIElement sender, DragStartingEventArgs args)
+        {
+            if (Icon == null) return;
+            var file = await StorageFile.GetFileFromPathAsync(Icon.FullPath);
+            args.Data.SetStorageItems(new[] { file });
+            args.Data.RequestedOperation = DataPackageOperation.Copy;
+        }
+
         private void Root_DragOver(object sender, DragEventArgs e)
         {
             if (e.DataView.Contains(StandardDataFormats.StorageItems))

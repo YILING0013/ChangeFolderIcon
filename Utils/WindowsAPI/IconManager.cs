@@ -44,31 +44,24 @@ namespace ChangeFolderIcon.Utils.WindowsAPI
             if (string.IsNullOrWhiteSpace(folderPath) || string.IsNullOrWhiteSpace(iconPath))
                 throw new ArgumentException("folderPath 或 iconPath 为空。");
 
-            if (!Directory.Exists(folderPath))
-                throw new DirectoryNotFoundException(folderPath);
+            if (!Directory.Exists(folderPath)) throw new DirectoryNotFoundException(folderPath);
+            if (!File.Exists(iconPath)) throw new FileNotFoundException(iconPath);
 
-            if (!File.Exists(iconPath))
-                throw new FileNotFoundException(iconPath);
-
-            // 1) 写 desktop.ini
             var iniPath = Path.Combine(folderPath, "desktop.ini");
-            var iniContent =
-@"[.ShellClassInfo]
-IconResource=" + iconPath + ",0";
 
-            File.WriteAllText(iniPath, iniContent);
+            // 先确保可写
+            EnsureWritable(folderPath, iniPath);
 
-            // 2) 设置 desktop.ini 为隐藏+系统（使用 Win32 枚举）
+            // 写入
+            var iniContent = "[.ShellClassInfo]\r\nIconResource=" + iconPath + ",0";
+            File.WriteAllText(iniPath, iniContent, Encoding.Unicode); // 推荐使用 Unicode
+
+            // 还原属性
             SetFileAttributes(iniPath, Win32FileAttributes.Hidden | Win32FileAttributes.System);
-
-            // 3) 设置文件夹为只读（使用 .NET 的 System.IO.FileAttributes）
             var attrs = File.GetAttributes(folderPath);
-            if (!attrs.HasFlag(System.IO.FileAttributes.ReadOnly))
-            {
-                File.SetAttributes(folderPath, attrs | System.IO.FileAttributes.ReadOnly);
-            }
+            if (!attrs.HasFlag(FileAttributes.ReadOnly))
+                File.SetAttributes(folderPath, attrs | FileAttributes.ReadOnly);
 
-            // 4) 通知系统刷新图标显示
             NotifyExplorer(folderPath);
         }
 
@@ -93,6 +86,60 @@ IconResource=" + iconPath + ",0";
                 }
             }
             return applied;
+        }
+
+        /// <summary>
+        /// 删除/重置单个文件夹图标
+        /// </summary>
+        /// <param name="folderPath"></param>
+        public static void ClearFolderIcon(string folderPath)
+        {
+            var iniPath = Path.Combine(folderPath, "desktop.ini");
+            EnsureWritable(folderPath, iniPath);
+
+            if (File.Exists(iniPath))
+                File.Delete(iniPath);
+
+            // 去掉只读
+            var attrs = File.GetAttributes(folderPath);
+            if (attrs.HasFlag(FileAttributes.ReadOnly))
+                File.SetAttributes(folderPath, attrs & ~FileAttributes.ReadOnly);
+
+            NotifyExplorer(folderPath);
+        }
+
+        /// <summary>
+        /// 对子目录递归重置。
+        /// </summary>
+        /// <param name="rootFolderPath"></param>
+        /// <returns></returns>
+        public static int ClearIconRecursively(string rootFolderPath)
+        {
+            if (!Directory.Exists(rootFolderPath)) return 0;
+            int count = 0;
+
+            foreach (var dir in Directory.EnumerateDirectories(rootFolderPath, "*", SearchOption.AllDirectories))
+            {
+                try { ClearFolderIcon(dir); count++; } catch { /* ignore */ }
+            }
+            // 自身也清理
+            try { ClearFolderIcon(rootFolderPath); count++; } catch { }
+
+            return count;
+        }
+
+        private static void EnsureWritable(string folderPath, string iniPath)
+        {
+            // 1) 取消文件夹只读
+            var attrs = File.GetAttributes(folderPath);
+            if (attrs.HasFlag(FileAttributes.ReadOnly))
+                File.SetAttributes(folderPath, attrs & ~FileAttributes.ReadOnly);
+
+            // 2) 如果有 desktop.ini，把隐藏/系统去掉
+            if (File.Exists(iniPath))
+            {
+                File.SetAttributes(iniPath, FileAttributes.Normal);
+            }
         }
 
         private static void NotifyExplorer(string path)

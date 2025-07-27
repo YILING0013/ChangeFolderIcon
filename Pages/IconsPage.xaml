@@ -50,6 +50,8 @@
                     HorizontalAlignment="Right" Margin="12" Visibility="Collapsed">
             <Button Content="确定应用" Click="ApplyButton_Click"/>
             <Button Content="应用到所有子文件夹" Click="ApplyAllButton_Click"/>
+            <Button Content="重置本文件夹图标" Click="ClearButton_Click"/>
+            <Button Content="重置本文件夹及子目录" Click="ClearAllButton_Click"/>
         </StackPanel>
     </Grid>
 </Page>

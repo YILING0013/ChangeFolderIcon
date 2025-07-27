@@ -188,5 +188,79 @@ namespace ChangeFolderIcon.Pages
                 XamlRoot = this.XamlRoot
             }.ShowAsync();
         }
+
+        private async void ClearButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_selectedFolderPath))
+            {
+                var dlg = new ContentDialog
+                {
+                    Title = "提示",
+                    Content = "请在左侧导航中选择一个目标文件夹。",
+                    CloseButtonText = "确定",
+                    XamlRoot = this.XamlRoot
+                };
+                await dlg.ShowAsync();
+                return;
+            }
+            try
+            {
+                IconManager.ClearFolderIcon(_selectedFolderPath!);
+                await new ContentDialog
+                {
+                    Title = "完成",
+                    Content = $"已清除该文件夹的图标。",
+                    CloseButtonText = "确定",
+                    XamlRoot = this.XamlRoot
+                }.ShowAsync();
+            }
+            catch (Exception ex)
+            {
+                await new ContentDialog
+                {
+                    Title = "失败",
+                    Content = ex.Message,
+                    CloseButtonText = "确定",
+                    XamlRoot = this.XamlRoot
+                }.ShowAsync();
+            }
+        }
+
+        private async void ClearAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_selectedFolderPath))
+            {
+                var dlg = new ContentDialog
+                {
+                    Title = "提示",
+                    Content = "请在左侧导航中选择一个目标文件夹。",
+                    CloseButtonText = "确定",
+                    XamlRoot = this.XamlRoot
+                };
+                await dlg.ShowAsync();
+                return;
+            }
+            try
+            {
+                int count = IconManager.ClearIconRecursively(_selectedFolderPath!);
+                await new ContentDialog
+                {
+                    Title = "完成",
+                    Content = $"已清除 {count} 个子文件夹的图标。",
+                    CloseButtonText = "确定",
+                    XamlRoot = this.XamlRoot
+                }.ShowAsync();
+            }
+            catch (Exception ex)
+            {
+                await new ContentDialog
+                {
+                    Title = "失败",
+                    Content = ex.Message,
+                    CloseButtonText = "确定",
+                    XamlRoot = this.XamlRoot
+                }.ShowAsync();
+            }
+        }
     }
 }

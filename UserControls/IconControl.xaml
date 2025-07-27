@@ -9,6 +9,7 @@
     xmlns:models="using:ChangeFolderIcon.Models"
     AllowDrop="True"
     Drop="Root_Drop"
+    DragStarting="Root_DragStarting"
     DragOver="Root_DragOver"
     Width="120" Height="140"
     mc:Ignorable="d">

@@ -21,6 +21,7 @@
         </Grid.RowDefinitions>
         <controls:CustomTitleBar x:Name="CustomTitleBarControl" Grid.Row="0"  VerticalAlignment="Top" Height="32"/>
         <NavigationView x:Name="NavView"
+                        SelectionChanged="NavView_SelectionChanged"
                         Grid.Row="1"
                         Margin="0,1,0,0"
                         PaneDisplayMode="Left"
@@ -29,7 +30,7 @@
 
             <NavigationView.PaneHeader>
                 <Button x:Name="SelectFolderButton"
-                        Content="选择文件夹"
+                        Content="选择根文件夹"
                         Click="SelectFolderButton_Click"
                         HorizontalAlignment="Stretch"
                         Margin="8,0,4,0"/>
@@ -39,13 +40,13 @@
                 <NavigationViewItem x:Name="NavigationViewTip" Content="点击上方按钮选择一个文件夹" IsEnabled="False"/>
             </NavigationView.MenuItems>
 
-            <!-- 右侧内容区域 -->
-            <Frame x:Name="ContentFrame"/>
-
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem Content="About" Icon="ViewAll" />
                 <NavigationViewItem Content="Help" Icon="Help" />
             </NavigationView.FooterMenuItems>
+
+            <!-- 右侧内容区域 -->
+            <Frame x:Name="ContentFrame"/>
         </NavigationView>
     </Grid>
 </Window>

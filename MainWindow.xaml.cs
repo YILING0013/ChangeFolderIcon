@@ -1,3 +1,4 @@
+using ChangeFolderIcon.Pages;
 using ChangeFolderIcon.Utils.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -26,10 +27,18 @@ namespace ChangeFolderIcon
     public sealed partial class MainWindow : Window
     {
         private readonly FolderNavigationService _folderService = new FolderNavigationService();
+        private IconsPage? _iconsPage;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            // 构造时或 OnLoaded 时构建一次 IconsPage
+            _iconsPage = new IconsPage();
+            ContentFrame.Content = _iconsPage;
+
+            // 默认状态：未选择任何文件夹
+            _iconsPage.UpdateState(null);
         }
 
         /// <summary>
@@ -132,6 +141,23 @@ namespace ChangeFolderIcon
                     PopulateNavView(node.SubFolders, navItem.MenuItems);
                 }
             }
+        }
+
+        /// <summary>
+        /// 当左侧选择变化时，更新 IconsPage 的状态；不重新创建页面
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        {
+            string? selectedPath = null;
+
+            if (args.SelectedItemContainer is NavigationViewItem item && item.Tag is string tag && !string.IsNullOrEmpty(tag))
+            {
+                selectedPath = tag; // Tag 存放的是路径（你现有填充逻辑已设置）
+            }
+
+            _iconsPage?.UpdateState(selectedPath);
         }
     }
 }

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ChangeFolderIcon.Pages.IconsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:local="using:ChangeFolderIcon.Pages"
+    xmlns:controls="using:ChangeFolderIcon.UserControls"
+    xmlns:models="using:ChangeFolderIcon.Models"
+    AllowDrop="True"
+    DragOver="Page_DragOver"
+    Drop="Page_Drop">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header / Hander -->
+        <TextBlock x:Name="HeaderText"
+                   Margin="12,8,12,8"
+                   TextWrapping="Wrap"
+                   Style="{StaticResource TitleTextBlockStyle}"/>
+
+        <!-- 图标库 -->
+        <ScrollViewer Grid.Row="1">
+            <muxc:GridView x:Name="IconsGrid"
+                           IsItemClickEnabled="True"
+                           SelectionMode="Single"
+                           IsMultiSelectCheckBoxEnabled="False"
+                           ItemsSource="{x:Bind Icons}"
+                           ItemClick="IconsGrid_ItemClick">
+                <muxc:GridView.ItemTemplate>
+                    <DataTemplate x:DataType="models:IconInfo">
+                        <controls:IconControl Icon="{x:Bind}" />
+                    </DataTemplate>
+                </muxc:GridView.ItemTemplate>
+                <muxc:GridView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="0"/>
+                    </ItemsPanelTemplate>
+                </muxc:GridView.ItemsPanel>
+            </muxc:GridView>
+        </ScrollViewer>
+
+        <!-- 右下角按钮区（根据是否选中NavView文件夹而显示/隐藏） -->
+        <StackPanel x:Name="ActionPanel" Grid.Row="2" Orientation="Horizontal" Spacing="8"
+                    HorizontalAlignment="Right" Margin="12" Visibility="Collapsed">
+            <Button Content="确定应用" Click="ApplyButton_Click"/>
+            <Button Content="应用到所有子文件夹" Click="ApplyAllButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Page>
+

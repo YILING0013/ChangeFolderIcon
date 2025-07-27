@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ChangeFolderIcon (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ChangeFolderIcon (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

@@ -1,25 +1,12 @@
-using ChangeFolderIcon.Models;
+ï»¿using ChangeFolderIcon.Models;
+using ChangeFolderIcon.Utils.Events;
 using ChangeFolderIcon.Utils.WindowsAPI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.ApplicationModel.DataTransfer;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using System.Threading.Tasks;
 
 namespace ChangeFolderIcon.Pages
 {
@@ -27,240 +14,146 @@ namespace ChangeFolderIcon.Pages
     {
         public ObservableCollection<IconInfo> Icons { get; } = new();
 
-        private string? _selectedFolderPath;  // À´×Ô MainWindow µÄµ±Ç°Ñ¡ÖĞÎÄ¼ş¼Ğ
-        private IconInfo? _selectedIcon;      // µ±Ç°ÔÚÍ¼±ê¿âÖĞÑ¡ÖĞµÄÍ¼±ê
+        private string? _selectedFolderPath;
+        private IconInfo? _selectedIcon;
+
+        // é€šçŸ¥ MainWindow å›¾æ ‡å·²æ›´æ”¹çš„äº‹ä»¶
+        public event EventHandler<IconChangedEventArgs>? IconChanged;
 
         public IconsPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
             LoadIconsFromAssets();
             UpdateHeaderAndActions();
         }
 
         private void LoadIconsFromAssets()
         {
-            // Ô¼¶¨£ºAssets/ico Î»ÓÚ³ÌĞò¸ùÄ¿Â¼
-            var baseDir = AppContext.BaseDirectory;
-            var icoDir = Path.Combine(baseDir, "Assets", "ico");
+            string baseDir = AppContext.BaseDirectory;
+            string icoDir = Path.Combine(baseDir, "Assets", "ico");
             if (!Directory.Exists(icoDir)) return;
 
-            foreach (var ico in Directory.EnumerateFiles(icoDir, "*.ico"))
+            foreach (string ico in Directory.EnumerateFiles(icoDir, "*.ico"))
             {
                 try { Icons.Add(IconInfo.FromPath(ico)); }
-                catch { /* ºöÂÔ»µÍ¼±ê */ }
+                catch { /* ignore */ }
             }
         }
 
-        /// <summary> ÓÉ MainWindow µ÷ÓÃ£¬¸üĞÂ¡°ÊÇ·ñÑ¡ÖĞÎÄ¼ş¼Ğ¡±µÄ×´Ì¬¡£ </summary>
+        // ç”± MainWindow è°ƒç”¨ä»¥æ›´æ–°æ‰€é€‰æ–‡ä»¶å¤¹çš„çŠ¶æ€
         public void UpdateState(string? selectedFolderPath)
         {
             _selectedFolderPath = selectedFolderPath;
             UpdateHeaderAndActions();
         }
 
+        #region UI çŠ¶æ€
         private void UpdateHeaderAndActions()
         {
             if (string.IsNullOrEmpty(_selectedFolderPath))
             {
-                HeaderText.Text = "Ñ¡ÔñÒ»¸öÏ²»¶µÄÍ¼±ê£¬ÍÏ×§Íâ²¿ÎÄ¼ş¼Ğµ½Í¼±ê½øĞĞÓ¦ÓÃ¡£";
+                HeaderText.Text = "å°†å¤–éƒ¨æ–‡ä»¶å¤¹æ‹–åˆ°ä¸€ä¸ªå›¾æ ‡ä¸Šä»¥åº”ç”¨æ ·å¼ï¼Œæˆ–ä»å·¦ä¾§é€‰æ‹©ä¸€ä¸ªæ–‡ä»¶å¤¹åä½¿ç”¨ä¸‹æ–¹æŒ‰é’®æ“ä½œã€‚";
                 ActionPanel.Visibility = Visibility.Collapsed;
             }
             else
             {
-                HeaderText.Text = $"ÒÑÑ¡ÔñÎÄ¼ş¼Ğ£º{_selectedFolderPath}\nÑ¡ÔñÒ»¸öÏ²»¶µÄÍ¼±ê²¢Ó¦ÓÃ¡£";
+                HeaderText.Text = $"å·²é€‰æ‹©æ–‡ä»¶å¤¹ï¼š{_selectedFolderPath}\né€‰æ‹©ä¸€ä¸ªå›¾æ ‡å¹¶ç‚¹å‡»ä¸‹æ–¹æŒ‰é’®åº”ç”¨ã€‚";
                 ActionPanel.Visibility = Visibility.Visible;
             }
         }
+        #endregion
 
+        // å½“ç”¨æˆ·åœ¨ GridView ä¸­ç‚¹å‡»ä¸€ä¸ªå›¾æ ‡æ—¶ï¼Œæ›´æ–° _selectedIcon
         private void IconsGrid_ItemClick(object sender, ItemClickEventArgs e)
         {
             _selectedIcon = e.ClickedItem as IconInfo;
         }
 
-        // Ò³Ãæ¸ùµÄÍÏ×§Ö§³Ö£¨¿ÉÑ¡ÔöÇ¿£©£ºÔÚÒ³Ãæ¿Õ°×´¦Ò²ÄÜÍ¶µİÎÄ¼ş¼Ğ
-        private void Page_DragOver(object sender, DragEventArgs e)
-        {
-            if (e.DataView.Contains(StandardDataFormats.StorageItems))
-            {
-                e.AcceptedOperation = DataPackageOperation.Copy;
-                e.DragUIOverride.Caption = _selectedIcon == null
-                    ? "ÇëÏÈÑ¡ÔñÒ»¸öÍ¼±ê"
-                    : "ÊÍ·ÅÒÔ½«µ±Ç°Í¼±êÓ¦ÓÃµ½ÍÏÈëµÄÎÄ¼ş¼Ğ";
-            }
-        }
-
-        private async void Page_Drop(object sender, DragEventArgs e)
-        {
-            if (_selectedIcon == null)
-            {
-                var dlg = new ContentDialog
-                {
-                    Title = "ÌáÊ¾",
-                    Content = "ÇëÏÈÔÚÉÏ·½Í¼±ê¿âÖĞÑ¡ÔñÒ»¸öÍ¼±ê¡£",
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                };
-                await dlg.ShowAsync();
-                return;
-            }
-
-            var items = await e.DataView.GetStorageItemsAsync();
-            var folders = items.OfType<StorageFolder>().ToList();
-            if (folders.Count == 0) return;
-
-            int ok = 0, fail = 0;
-            foreach (var f in folders)
-            {
-                try { IconManager.SetFolderIcon(f.Path, _selectedIcon.FullPath); ok++; }
-                catch { fail++; }
-            }
-
-            var resultDlg = new ContentDialog
-            {
-                Title = "Ó¦ÓÃ½á¹û",
-                Content = $"³É¹¦£º{ok}£¬Ê§°Ü£º{fail}",
-                CloseButtonText = "È·¶¨",
-                XamlRoot = this.XamlRoot
-            };
-            await resultDlg.ShowAsync();
-        }
-
+        #region â€œå•æ–‡ä»¶å¤¹â€æŒ‰é’®æ“ä½œ
         private async void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedIcon == null || string.IsNullOrEmpty(_selectedFolderPath))
-            {
-                var dlg = new ContentDialog
-                {
-                    Title = "ÌáÊ¾",
-                    Content = "ÇëÑ¡ÔñÒ»¸öÍ¼±ê£¬²¢ÔÚ×ó²àµ¼º½ÖĞÑ¡ÔñÄ¿±êÎÄ¼ş¼Ğ¡£",
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                };
-                await dlg.ShowAsync();
-                return;
-            }
+            if (!CheckPreCondition()) return;
 
             try
             {
-                IconManager.SetFolderIcon(_selectedFolderPath!, _selectedIcon.FullPath);
-                await new ContentDialog
-                {
-                    Title = "Íê³É",
-                    Content = "ÒÑÓ¦ÓÃµ½Ñ¡ÖĞÎÄ¼ş¼Ğ¡£",
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                }.ShowAsync();
+                IconManager.SetFolderIcon(_selectedFolderPath!, _selectedIcon!.FullPath);
+                IconChanged?.Invoke(this, new IconChangedEventArgs(_selectedFolderPath!, _selectedIcon.FullPath));
+                await ShowMsg("å®Œæˆ", "å·²åº”ç”¨åˆ°é€‰ä¸­æ–‡ä»¶å¤¹ã€‚");
             }
-            catch (Exception ex)
-            {
-                await new ContentDialog
-                {
-                    Title = "Ê§°Ü",
-                    Content = ex.Message,
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                }.ShowAsync();
-            }
-        }
-
-        private async void ApplyAllButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_selectedIcon == null || string.IsNullOrEmpty(_selectedFolderPath))
-            {
-                var dlg = new ContentDialog
-                {
-                    Title = "ÌáÊ¾",
-                    Content = "ÇëÑ¡ÔñÒ»¸öÍ¼±ê£¬²¢ÔÚ×ó²àµ¼º½ÖĞÑ¡ÔñÄ¿±êÎÄ¼ş¼Ğ¡£",
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                };
-                await dlg.ShowAsync();
-                return;
-            }
-
-            int count = IconManager.ApplyIconToAllSubfolders(_selectedFolderPath!, _selectedIcon.FullPath);
-
-            await new ContentDialog
-            {
-                Title = "Íê³É",
-                Content = $"ÒÑÎª {count} ¸ö×ÓÎÄ¼ş¼ĞÓ¦ÓÃÍ¼±ê¡£",
-                CloseButtonText = "È·¶¨",
-                XamlRoot = this.XamlRoot
-            }.ShowAsync();
+            catch (Exception ex) { await ShowMsg("å¤±è´¥", ex.Message); }
         }
 
         private async void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(_selectedFolderPath))
-            {
-                var dlg = new ContentDialog
-                {
-                    Title = "ÌáÊ¾",
-                    Content = "ÇëÔÚ×ó²àµ¼º½ÖĞÑ¡ÔñÒ»¸öÄ¿±êÎÄ¼ş¼Ğ¡£",
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                };
-                await dlg.ShowAsync();
-                return;
-            }
+            { await ShowMsg("æç¤º", "è¯·åœ¨å·¦ä¾§å¯¼èˆªä¸­é€‰æ‹©ä¸€ä¸ªç›®æ ‡æ–‡ä»¶å¤¹ã€‚"); return; }
+
             try
             {
                 IconManager.ClearFolderIcon(_selectedFolderPath!);
-                await new ContentDialog
-                {
-                    Title = "Íê³É",
-                    Content = $"ÒÑÇå³ı¸ÃÎÄ¼ş¼ĞµÄÍ¼±ê¡£",
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                }.ShowAsync();
+                IconChanged?.Invoke(this, new IconChangedEventArgs(_selectedFolderPath!, null));
+                await ShowMsg("å®Œæˆ", "å·²æ¸…é™¤è¯¥æ–‡ä»¶å¤¹çš„å›¾æ ‡ã€‚");
             }
-            catch (Exception ex)
-            {
-                await new ContentDialog
-                {
-                    Title = "Ê§°Ü",
-                    Content = ex.Message,
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                }.ShowAsync();
-            }
+            catch (Exception ex) { await ShowMsg("å¤±è´¥", ex.Message); }
+        }
+        #endregion
+
+        #region â€œé€’å½’/æ‰¹é‡â€æŒ‰é’®æ“ä½œ
+        private async void ApplyAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!CheckPreCondition()) return;
+
+            int count = IconManager.ApplyIconToAllSubfolders(_selectedFolderPath!, _selectedIcon!.FullPath);
+            RaiseForAllSubFolders(_selectedFolderPath!, _selectedIcon!.FullPath);
+            await ShowMsg("å®Œæˆ", $"å·²ä¸º {count} ä¸ªå­æ–‡ä»¶å¤¹åº”ç”¨å›¾æ ‡ã€‚");
         }
 
         private async void ClearAllButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(_selectedFolderPath))
+            { await ShowMsg("æç¤º", "è¯·å…ˆé€‰æ‹©ç›®æ ‡æ–‡ä»¶å¤¹ã€‚"); return; }
+
+            int count = IconManager.ClearIconRecursively(_selectedFolderPath!);
+            RaiseForAllSubFolders(_selectedFolderPath!, null);
+            await ShowMsg("å®Œæˆ", $"å·²æ¸…é™¤ {count} ä¸ªæ–‡ä»¶å¤¹ï¼ˆåŒ…æ‹¬å­æ–‡ä»¶å¤¹ï¼‰çš„å›¾æ ‡ã€‚");
+        }
+        #endregion
+
+        #region å…±ç”¨å°å·¥å…·
+        private bool CheckPreCondition()
+        {
+            if (_selectedIcon == null)
             {
-                var dlg = new ContentDialog
-                {
-                    Title = "ÌáÊ¾",
-                    Content = "ÇëÔÚ×ó²àµ¼º½ÖĞÑ¡ÔñÒ»¸öÄ¿±êÎÄ¼ş¼Ğ¡£",
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                };
-                await dlg.ShowAsync();
-                return;
+                _ = ShowMsg("æç¤º", "è¯·å…ˆç‚¹å‡»é€‰æ‹©ä¸€ä¸ªå›¾æ ‡ã€‚");
+                return false;
             }
-            try
+            if (string.IsNullOrEmpty(_selectedFolderPath))
             {
-                int count = IconManager.ClearIconRecursively(_selectedFolderPath!);
-                await new ContentDialog
-                {
-                    Title = "Íê³É",
-                    Content = $"ÒÑÇå³ı {count} ¸ö×ÓÎÄ¼ş¼ĞµÄÍ¼±ê¡£",
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                }.ShowAsync();
+                _ = ShowMsg("æç¤º", "è¯·å…ˆåœ¨å·¦ä¾§å¯¼èˆªä¸­é€‰æ‹©ä¸€ä¸ªæ–‡ä»¶å¤¹ã€‚");
+                return false;
             }
-            catch (Exception ex)
+            return true;
+        }
+
+        private static async Task ShowMsg(string title, string msg) =>
+            await new ContentDialog
             {
-                await new ContentDialog
-                {
-                    Title = "Ê§°Ü",
-                    Content = ex.Message,
-                    CloseButtonText = "È·¶¨",
-                    XamlRoot = this.XamlRoot
-                }.ShowAsync();
+                Title = title,
+                Content = msg,
+                CloseButtonText = "ç¡®å®š",
+                XamlRoot = App.window?.Content.XamlRoot
+            }.ShowAsync();
+
+        private void RaiseForAllSubFolders(string root, string? iconPath)
+        {
+            // æ ¹ç›®å½•æœ¬èº«
+            IconChanged?.Invoke(this, new IconChangedEventArgs(root, iconPath));
+            // æ‰€æœ‰å­ç›®å½•
+            foreach (string dir in Directory.EnumerateDirectories(root, "*", SearchOption.AllDirectories))
+            {
+                IconChanged?.Invoke(this, new IconChangedEventArgs(dir, iconPath));
             }
         }
+        #endregion
     }
 }

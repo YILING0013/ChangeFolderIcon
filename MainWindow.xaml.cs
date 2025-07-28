@@ -1,163 +1,134 @@
 using ChangeFolderIcon.Pages;
+using ChangeFolderIcon.Utils.Events;
 using ChangeFolderIcon.Utils.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using static ChangeFolderIcon.Utils.Services.FolderNavigationService;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace ChangeFolderIcon
 {
     public sealed partial class MainWindow : Window
     {
-        private readonly FolderNavigationService _folderService = new FolderNavigationService();
-        private IconsPage? _iconsPage;
+        private readonly FolderNavigationService _folderService = new();
+        private readonly IconsPage _iconsPage;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // 构造时或 OnLoaded 时构建一次 IconsPage
             _iconsPage = new IconsPage();
+            _iconsPage.IconChanged += IconsPage_IconChanged;  // 订阅事件
             ContentFrame.Content = _iconsPage;
-
-            // 默认状态：未选择任何文件夹
             _iconsPage.UpdateState(null);
         }
 
-        /// <summary>
-        /// “选择文件夹”按钮的点击事件处理。
-        /// </summary>
+        #region ① 选择根文件夹 —— 构建树
         private async void SelectFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            var folderPicker = new FolderPicker();
-            folderPicker.SuggestedStartLocation = PickerLocationId.Desktop;
-            folderPicker.FileTypeFilter.Add("*");
-
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
-
-            StorageFolder folder = await folderPicker.PickSingleFolderAsync();
-
-            if (folder != null)
+            var picker = new Windows.Storage.Pickers.FolderPicker
             {
-                SelectFolderButton.IsEnabled = false;
+                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop
+            };
+            picker.FileTypeFilter.Add("*");
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+            var folder = await picker.PickSingleFolderAsync();
+            if (folder is null) return;
+
+            SelectFolderButton.IsEnabled = false;
+            NavView.MenuItems.Clear();
+            NavView.MenuItems.Add(new NavigationViewItem
+            {
+                Content = "加载中...",
+                IsEnabled = false
+            });
+
+            try
+            {
+                List<FolderNavigationService.FolderNode> nodes =
+                    await Task.Run(() => _folderService.BuildChildNodes(folder.Path));
+
                 NavView.MenuItems.Clear();
-                var loadingItem = new NavigationViewItem { Content = "加载中...", IsEnabled = false };
-                NavView.MenuItems.Add(loadingItem);
-
-                try
-                {
-                    // 1. 在后台线程上调用服务来构建数据模型树
-                    List<FolderNode> childNodes = await Task.Run(() => _folderService.BuildChildNodes(folder.Path));
-
-                    // 2. 返回UI线程，清空加载指示器
-                    NavView.MenuItems.Clear();
-
-                    // 3. 根据构建好的数据模型，在UI线程上填充NavigationView
-                    PopulateNavView(childNodes, NavView.MenuItems);
-                }
-                catch (Exception ex)
-                {
-                    NavView.MenuItems.Clear();
-                    var errorItem = new NavigationViewItem { Content = $"加载失败: {ex.Message}", IsEnabled = false };
-                    NavView.MenuItems.Add(errorItem);
-                }
-                finally
-                {
-                    SelectFolderButton.IsEnabled = true;
-                }
+                PopulateNavView(nodes, NavView.MenuItems);
             }
+            catch (Exception ex)
+            {
+                NavView.MenuItems.Clear();
+                NavView.MenuItems.Add(new NavigationViewItem
+                {
+                    Content = "加载失败: " + ex.Message,
+                    IsEnabled = false
+                });
+            }
+            finally { SelectFolderButton.IsEnabled = true; }
         }
+        #endregion
 
-        /// <summary>
-        /// 使用预先构建的节点树来递归填充 NavigationView。
-        /// </summary>
-        /// <param name="nodes">要添加到UI的文件夹数据节点列表</param>
-        /// <param name="menuItems">用于添加新创建的 NavigationViewItem 的UI集合</param>
-        private void PopulateNavView(List<FolderNode> nodes, IList<object> menuItems)
+        #region ② 构建 NavigationView
+        private void PopulateNavView(
+            IEnumerable<FolderNavigationService.FolderNode> nodes, IList<object> menuItems)
         {
             foreach (var node in nodes)
             {
-                var navItem = new NavigationViewItem
-                {
-                    Content = node.Name,
-                    Tag = node.Path,
-                };
-
-                // 检查是否存在自定义图标路径
-                if (!string.IsNullOrEmpty(node.IconPath) && File.Exists(node.IconPath))
-                {
-                    try
-                    {
-                        // 如果存在，使用 BitmapIcon 显示自定义图标
-                        navItem.Icon = new BitmapIcon
-                        {
-                            UriSource = new Uri(node.IconPath),
-                            ShowAsMonochrome = false // 确保显示彩色图标
-                        };
-                    }
-                    catch (Exception)
-                    {
-                        // 如果创建图标失败（例如路径无效）
-                        navItem.Icon = new BitmapIcon
-                        {
-                            UriSource = new Uri("ms-appx:///Assets/icon/default.ico"),
-                            ShowAsMonochrome = false
-                        };
-                    }
-                }
-                else
-                {
-                    // 否则，使用默认的文件夹图标
-                    navItem.Icon = new BitmapIcon
-                    {
-                        UriSource = new Uri("ms-appx:///Assets/icon/default.ico"),
-                        ShowAsMonochrome = false
-                    };
-                }
-
+                var navItem = new NavigationViewItem { Content = node.Name, Tag = node.Path };
+                SetNavItemIcon(navItem, node.IconPath);
                 menuItems.Add(navItem);
 
-                // 递归为其子文件夹填充菜单项
                 if (node.SubFolders.Any())
-                {
                     PopulateNavView(node.SubFolders, navItem.MenuItems);
-                }
             }
         }
 
-        /// <summary>
-        /// 当左侧选择变化时，更新 IconsPage 的状态；不重新创建页面
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private static void SetNavItemIcon(NavigationViewItem item, string? iconPath)
         {
-            string? selectedPath = null;
+            var uri = !string.IsNullOrEmpty(iconPath) && File.Exists(iconPath)
+                ? new Uri(iconPath)
+                : new Uri("ms-appx:///Assets/icon/default.ico");
 
-            if (args.SelectedItemContainer is NavigationViewItem item && item.Tag is string tag && !string.IsNullOrEmpty(tag))
-            {
-                selectedPath = tag; // Tag 存放的是路径（你现有填充逻辑已设置）
-            }
-
-            _iconsPage?.UpdateState(selectedPath);
+            item.Icon = new BitmapIcon { UriSource = uri, ShowAsMonochrome = false };
         }
+        #endregion
+
+        #region ③ 左侧选中 -> 通知 IconsPage
+        private void NavView_SelectionChanged(
+            NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        {
+            string? path = (args.SelectedItemContainer as NavigationViewItem)?.Tag as string;
+            _iconsPage.UpdateState(path);
+        }
+        #endregion
+
+        #region ④ IconsPage 改变图标 -> 局部刷新 NavigationView
+        private void IconsPage_IconChanged(object? sender, IconChangedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.FolderPath)) return;
+
+            if (FindNavItemByPath(e.FolderPath, NavView.MenuItems) is NavigationViewItem navItem)
+            {
+                SetNavItemIcon(navItem, e.IconPath);
+            }
+        }
+
+        private NavigationViewItem? FindNavItemByPath(
+            string path, IList<object> items)
+        {
+            foreach (var obj in items)
+            {
+                if (obj is not NavigationViewItem nvi) continue;
+                if (string.Equals(nvi.Tag as string, path, StringComparison.OrdinalIgnoreCase))
+                    return nvi;
+
+                if (nvi.MenuItems.Count > 0 &&
+                    FindNavItemByPath(path, nvi.MenuItems) is NavigationViewItem found)
+                    return found;
+            }
+            return null;
+        }
+        #endregion
     }
 }

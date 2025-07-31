@@ -12,17 +12,131 @@
     Drop="Root_Drop"
     Width="120" Height="140">
 
-    <Grid CornerRadius="12"
-          BorderThickness="1" Padding="8">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="32"/>
-        </Grid.RowDefinitions>
+    <UserControl.Resources>
+        <Storyboard x:Name="HoverStoryboard">
+            <DoubleAnimation Storyboard.TargetName="ScaleTransform"
+                             Storyboard.TargetProperty="ScaleX"
+                             To="1.05" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ScaleTransform"
+                             Storyboard.TargetProperty="ScaleY"
+                             To="1.05" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShadowPanel"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0.3" Duration="0:0:0.2"/>
+        </Storyboard>
+        <Storyboard x:Name="UnhoverStoryboard">
+            <DoubleAnimation Storyboard.TargetName="ScaleTransform"
+                             Storyboard.TargetProperty="ScaleX"
+                             To="1.0" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ScaleTransform"
+                             Storyboard.TargetProperty="ScaleY"
+                             To="1.0" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="ShadowPanel"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0" Duration="0:0:0.2"/>
+        </Storyboard>
+    </UserControl.Resources>
 
-        <Image Source="{x:Bind Icon.IconSource, Mode=OneWay}"
-               Stretch="Uniform" Margin="4"/>
+    <Grid RenderTransformOrigin="0.5,0.5"
+          PointerEntered="Grid_PointerEntered"
+          PointerExited="Grid_PointerExited">
+        <Grid.RenderTransform>
+            <ScaleTransform x:Name="ScaleTransform" ScaleX="1" ScaleY="1"/>
+        </Grid.RenderTransform>
 
-        <TextBlock Grid.Row="1" Text="{x:Bind Icon.Name, Mode=OneWay}"
-                   HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+        <!-- 阴影效果 -->
+        <Border x:Name="ShadowPanel"
+                CornerRadius="12"
+                Background="{ThemeResource SubtleFillColorTertiaryBrush}"
+                Margin="4"
+                Opacity="0">
+            <Border.Shadow>
+                <ThemeShadow />
+            </Border.Shadow>
+        </Border>
+
+        <!-- 主内容 -->
+        <Border CornerRadius="12"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                Margin="4">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- 图标显示区域 -->
+                <Grid Grid.Row="0" Padding="8">
+                    <Border CornerRadius="8"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Padding="12">
+                        <Image Source="{x:Bind Icon.IconSource, Mode=OneWay}"
+                               Width="48" Height="48"
+                               Stretch="Uniform"/>
+                    </Border>
+
+                    <!-- 选中状态指示器 -->
+                    <Border x:Name="SelectionIndicator"
+                            CornerRadius="8"
+                            BorderThickness="2"
+                            BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                            Visibility="Collapsed"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"/>
+                </Grid>
+
+                <!-- 图标名称 -->
+                <Border Grid.Row="1"
+                        Background="{ThemeResource SubtleFillColorTertiaryBrush}"
+                        CornerRadius="0,0,11,11"
+                        Padding="8,6,8,8">
+                    <TextBlock Text="{x:Bind Icon.Name, Mode=OneWay}"
+                               HorizontalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"
+                               FontSize="12"
+                               ToolTipService.ToolTip="{x:Bind Icon.Name, Mode=OneWay}"/>
+                </Border>
+
+                <!-- 拖放提示覆盖层 -->
+                <Border x:Name="DragOverlay"
+                        Grid.RowSpan="2"
+                        CornerRadius="12"
+                        Background="{ThemeResource AccentFillColorDefaultBrush}"
+                        Opacity="0.9"
+                        Visibility="Collapsed">
+                    <StackPanel VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Spacing="4">
+                        <FontIcon Glyph="&#xE896;"
+                                  FontSize="24"
+                                  Foreground="White"/>
+                        <TextBlock Text="释放以应用"
+                                   Foreground="White"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

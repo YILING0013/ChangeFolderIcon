@@ -26,23 +26,97 @@
                         Margin="0,1,0,0"
                         PaneDisplayMode="Left"
                         IsBackButtonVisible="Collapsed"
-                        IsSettingsVisible="False">
+                        IsSettingsVisible="False"
+                        IsPaneToggleButtonVisible="False"
+                        CompactModeThresholdWidth="48"
+                        OpenPaneLength="280">
 
-            <NavigationView.PaneHeader>
-                <Button x:Name="SelectFolderButton"
-                        Content="选择根文件夹"
-                        Click="SelectFolderButton_Click"
-                        HorizontalAlignment="Stretch"
-                        Margin="8,0,4,0"/>
-            </NavigationView.PaneHeader>
+            <NavigationView.PaneCustomContent>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="4*"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- 自定义导航按钮 -->
+                        <Button x:Name="PaneToggleButton"
+                                Grid.Column="0"
+                                Click="PaneToggleButton_Click"
+                                Width="48"
+                                Height="48"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="0,0,2,0">
+                            <FontIcon Glyph="&#xE700;" FontSize="16"/>
+                        </Button>
+
+                        <!-- 选择文件夹按钮 -->
+                        <Button x:Name="SelectFolderButton"
+                                Grid.Column="1"
+                                Click="SelectFolderButton_Click"
+                                Height="48"
+                                Margin="2,0,4,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                HorizontalContentAlignment="Left">
+                            <Button.Content>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- 图标总是显示 -->
+                                    <FontIcon Grid.Column="0"
+                                              Glyph="&#xED25;" 
+                                              FontSize="20"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+
+                                    <!-- 文字内容，仅在展开时显示 -->
+                                    <StackPanel Grid.Column="1" 
+                                                VerticalAlignment="Center"
+                                                x:Name="SelectFolderButtonText">
+                                        <TextBlock Text="选择根文件夹" 
+                                                   FontWeight="SemiBold" 
+                                                   FontSize="14"/>
+                                        <TextBlock Text="浏览并选择文件夹" 
+                                                   FontSize="11" 
+                                                   Opacity="0.8"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button.Content>
+                        </Button>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <!-- 分隔线 -->
+                        <Border Height="1" 
+                                Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                Margin="8,8,8,8"
+                                x:Name="DividerLine"/>
+                    </Grid>
+                </Grid>
+                
+            </NavigationView.PaneCustomContent>
 
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Name="NavigationViewTip" Content="点击上方按钮选择一个文件夹" IsEnabled="False"/>
+                <NavigationViewItem x:Name="NavigationViewTip" IsEnabled="False">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE946;"/>
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.Content>
+                        <TextBlock Text="尚未选择文件夹"/>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem Content="About" Icon="ViewAll" />
-                <NavigationViewItem Content="Help" Icon="Help" />
+                <NavigationViewItem Content="关于" Icon="ViewAll" />
+                <NavigationViewItem Content="帮助" Icon="Help" />
             </NavigationView.FooterMenuItems>
 
             <!-- 右侧内容区域 -->

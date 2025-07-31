@@ -24,9 +24,47 @@ namespace ChangeFolderIcon
             _iconsPage.IconChanged += IconsPage_IconChanged;  // 订阅事件
             ContentFrame.Content = _iconsPage;
             _iconsPage.UpdateState(null);
+
+            // 监听面板状态变化
+            NavView.PaneOpening += NavView_PaneStateChanged;
+            NavView.PaneClosing += NavView_PaneStateChanged;
+
+            // 初始化面板状态
+            UpdatePaneVisibility(NavView.IsPaneOpen);
         }
 
-        #region ① 选择根文件夹 —— 构建树
+        #region 面板状态管理
+        private void NavView_PaneStateChanged(NavigationView sender, object args)
+        {
+            UpdatePaneVisibility(sender.IsPaneOpen);
+        }
+
+        private void UpdatePaneVisibility(bool isPaneOpen)
+        {
+            // 更新按钮文字可见性
+            SelectFolderButtonText.Visibility = isPaneOpen ? Visibility.Visible : Visibility.Collapsed;
+
+            // 更新分隔线可见性
+            DividerLine.Visibility = isPaneOpen ? Visibility.Visible : Visibility.Collapsed;
+
+            // 更新选择文件夹按钮的边距
+            if (isPaneOpen)
+            {
+                SelectFolderButton.Margin = new Thickness(4, 4, 4, 4);
+            }
+            else
+            {
+                SelectFolderButton.Margin = new Thickness(4, 4, 4, 8);
+            }
+        }
+
+        private void PaneToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavView.IsPaneOpen = !NavView.IsPaneOpen;
+        }
+        #endregion
+
+        #region ① 选择根文件夹 —— 构建子菜单
         private async void SelectFolderButton_Click(object sender, RoutedEventArgs e)
         {
             var picker = new Windows.Storage.Pickers.FolderPicker
@@ -42,11 +80,14 @@ namespace ChangeFolderIcon
 
             SelectFolderButton.IsEnabled = false;
             NavView.MenuItems.Clear();
-            NavView.MenuItems.Add(new NavigationViewItem
+
+            var loadingItem = new NavigationViewItem
             {
                 Content = "加载中...",
+                Icon = new FontIcon { Glyph = "\uE895" },
                 IsEnabled = false
-            });
+            };
+            NavView.MenuItems.Add(loadingItem);
 
             try
             {
@@ -59,11 +100,13 @@ namespace ChangeFolderIcon
             catch (Exception ex)
             {
                 NavView.MenuItems.Clear();
-                NavView.MenuItems.Add(new NavigationViewItem
+                var errorItem = new NavigationViewItem
                 {
                     Content = "加载失败: " + ex.Message,
+                    Icon = new FontIcon { Glyph = "\uE783" },
                     IsEnabled = false
-                });
+                };
+                NavView.MenuItems.Add(errorItem);
             }
             finally { SelectFolderButton.IsEnabled = true; }
         }

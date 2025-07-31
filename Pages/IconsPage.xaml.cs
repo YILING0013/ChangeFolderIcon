@@ -3,9 +3,12 @@ using ChangeFolderIcon.Utils.Events;
 using ChangeFolderIcon.Utils.WindowsAPI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ChangeFolderIcon.Pages
@@ -13,6 +16,7 @@ namespace ChangeFolderIcon.Pages
     public sealed partial class IconsPage : Page
     {
         public ObservableCollection<IconInfo> Icons { get; } = new();
+        public ICollectionView GroupedIcons { get; private set; }
 
         private string? _selectedFolderPath;
         private IconInfo? _selectedIcon;
@@ -24,6 +28,8 @@ namespace ChangeFolderIcon.Pages
         {
             InitializeComponent();
             LoadIconsFromAssets();
+            SetupGrouping();
+            SetupAlphabetIndex();
             UpdateHeaderAndActions();
         }
 
@@ -40,6 +46,98 @@ namespace ChangeFolderIcon.Pages
             }
         }
 
+        private void SetupGrouping()
+        {
+            // 创建分组的集合
+            var groupedCollection = new List<IconGroup>();
+
+            // 按首字母分组
+            var groups = Icons.GroupBy(icon =>
+            {
+                if (string.IsNullOrEmpty(icon.Name)) return "#";
+                char firstChar = char.ToUpper(icon.Name[0]);
+                if (char.IsDigit(firstChar)) return firstChar.ToString();
+                if (char.IsLetter(firstChar)) return firstChar.ToString();
+                return "#";
+            }).OrderBy(g =>
+            {
+                if (g.Key == "#") return "ZZZ"; // 放到最后
+                return g.Key;
+            });
+
+            foreach (var group in groups)
+            {
+                groupedCollection.Add(new IconGroup(group.Key, group));
+            }
+
+            // 创建CollectionViewSource
+            var cvs = new CollectionViewSource
+            {
+                Source = groupedCollection,
+                IsSourceGrouped = true
+            };
+
+            GroupedIcons = cvs.View;
+        }
+
+        private void SetupAlphabetIndex()
+        {
+            // 创建索引按钮
+            var indexChars = new List<string> { "0-9" };
+            indexChars.AddRange(Enumerable.Range('A', 26).Select(i => ((char)i).ToString()));
+            indexChars.Add("#");
+
+            foreach (var indexChar in indexChars)
+            {
+                var button = new Button
+                {
+                    Content = indexChar,
+                    Width = 24,
+                    Height = 24,
+                    Padding = new Thickness(0),
+                    Margin = new Thickness(0,2,0,2),
+                    FontSize = 11,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    //Style = (Style)Application.Current.Resources["SubtleButtonStyle"]
+                };
+
+                button.Click += (s, e) => OnIndexButtonClick(indexChar);
+                AlphabetIndexPanel.Children.Add(button);
+            }
+        }
+
+        private void OnIndexButtonClick(string index)
+        {
+            IconInfo? targetItem = null;
+
+            if (index == "0-9")
+            {
+                // 查找第一个以数字开头的图标
+                targetItem = Icons.FirstOrDefault(icon =>
+                    !string.IsNullOrEmpty(icon.Name) && char.IsDigit(icon.Name[0]));
+            }
+            else if (index == "#")
+            {
+                // 查找第一个非字母数字开头的图标
+                targetItem = Icons.FirstOrDefault(icon =>
+                    string.IsNullOrEmpty(icon.Name) ||
+                    (!char.IsLetterOrDigit(icon.Name[0])));
+            }
+            else
+            {
+                // 查找第一个以指定字母开头的图标
+                char targetChar = index[0];
+                targetItem = Icons.FirstOrDefault(icon =>
+                    !string.IsNullOrEmpty(icon.Name) &&
+                    char.ToUpper(icon.Name[0]) == targetChar);
+            }
+
+            if (targetItem != null)
+            {
+                IconsGrid.ScrollIntoView(targetItem, ScrollIntoViewAlignment.Leading);
+            }
+        }
+
         // 由 MainWindow 调用以更新所选文件夹的状态
         public void UpdateState(string? selectedFolderPath)
         {
@@ -52,13 +150,31 @@ namespace ChangeFolderIcon.Pages
         {
             if (string.IsNullOrEmpty(_selectedFolderPath))
             {
-                HeaderText.Text = "将外部文件夹拖到一个图标上以应用样式，或从左侧选择一个文件夹后使用下方按钮操作。";
+                HeaderIcon.Glyph = "\uE946";
+                HeaderTitle.Text = "请选择文件夹";
+                HeaderDescription.Text = "从左侧导航栏选择文件夹，或直接拖拽文件夹到图标上";
                 ActionPanel.Visibility = Visibility.Collapsed;
             }
             else
             {
-                HeaderText.Text = $"已选择文件夹：{_selectedFolderPath}\n选择一个图标并点击下方按钮应用。";
+                HeaderIcon.Glyph = "\uE8B7";
+                HeaderTitle.Text = Path.GetFileName(_selectedFolderPath);
+                HeaderDescription.Text = _selectedFolderPath;
                 ActionPanel.Visibility = Visibility.Visible;
+            }
+
+            UpdateSelectedIconText();
+        }
+
+        private void UpdateSelectedIconText()
+        {
+            if (_selectedIcon != null)
+            {
+                SelectedIconText.Text = $"已选择: {_selectedIcon.Name}";
+            }
+            else
+            {
+                SelectedIconText.Text = "未选择图标";
             }
         }
         #endregion
@@ -67,9 +183,10 @@ namespace ChangeFolderIcon.Pages
         private void IconsGrid_ItemClick(object sender, ItemClickEventArgs e)
         {
             _selectedIcon = e.ClickedItem as IconInfo;
+            UpdateSelectedIconText();
         }
 
-        #region “单文件夹”按钮操作
+        #region "单文件夹"按钮操作
         private async void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
             if (!CheckPreCondition()) return;
@@ -98,7 +215,7 @@ namespace ChangeFolderIcon.Pages
         }
         #endregion
 
-        #region “递归/批量”按钮操作
+        #region "递归/批量"按钮操作
         private async void ApplyAllButton_Click(object sender, RoutedEventArgs e)
         {
             if (!CheckPreCondition()) return;
@@ -155,5 +272,16 @@ namespace ChangeFolderIcon.Pages
             }
         }
         #endregion
+    }
+
+    // 辅助类
+    public class IconGroup : List<IconInfo>
+    {
+        public string Key { get; set; }
+
+        public IconGroup(string key, IEnumerable<IconInfo> items) : base(items)
+        {
+            Key = key;
+        }
     }
 }

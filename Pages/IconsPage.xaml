@@ -17,40 +17,159 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header / Hander -->
-        <TextBlock x:Name="HeaderText"
-                   Margin="12,8,12,8"
-                   TextWrapping="Wrap"
-                   Style="{StaticResource TitleTextBlockStyle}"/>
+        <!-- 优化后的Header区域 -->
+        <Border Grid.Row="0" 
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="20,12,20,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-        <!-- 图标库 -->
-        <ScrollViewer Grid.Row="1">
-            <muxc:GridView x:Name="IconsGrid"
-                           ItemsSource="{x:Bind Icons}"
-                           IsItemClickEnabled="True"
-                           ItemClick="IconsGrid_ItemClick"
-                           SelectionMode="Single"
-                           IsMultiSelectCheckBoxEnabled="False">
-                <muxc:GridView.ItemTemplate>
-                    <DataTemplate x:DataType="models:IconInfo">
-                        <controls:IconControl Icon="{x:Bind}" />
-                    </DataTemplate>
-                </muxc:GridView.ItemTemplate>
-                <muxc:GridView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <ItemsWrapGrid MaximumRowsOrColumns="0" Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </muxc:GridView.ItemsPanel>
-            </muxc:GridView>
-        </ScrollViewer>
+                <FontIcon x:Name="HeaderIcon"
+                          Glyph="&#xE946;"
+                          FontSize="24"
+                          Margin="0,0,12,0"
+                          VerticalAlignment="Center"/>
 
-        <!-- 右下角按钮区（根据是否选中NavView文件夹而显示/隐藏） -->
-        <StackPanel x:Name="ActionPanel" Grid.Row="2" Orientation="Horizontal" Spacing="8"
-                    HorizontalAlignment="Right" Margin="12" Visibility="Collapsed">
-            <Button Content="确定应用" Click="ApplyButton_Click"/>
-            <Button Content="应用到所有子文件夹" Click="ApplyAllButton_Click"/>
-            <Button Content="重置本文件夹图标" Click="ClearButton_Click"/>
-            <Button Content="重置本文件夹及子目录" Click="ClearAllButton_Click"/>
-        </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock x:Name="HeaderTitle"
+                               Text="请选择文件夹"
+                               Style="{StaticResource SubtitleTextBlockStyle}"
+                               FontWeight="SemiBold"/>
+                    <TextBlock x:Name="HeaderDescription"
+                               Text="从左侧导航栏选择文件夹，或直接拖拽文件夹到图标上"
+                               Style="{StaticResource BodyTextBlockStyle}"
+                               Opacity="0.8"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 图标库主体区域 -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 图标网格 -->
+            <ScrollViewer x:Name="IconScrollViewer"
+                          Grid.Column="0"
+                          VerticalScrollBarVisibility="Auto">
+                <muxc:GridView x:Name="IconsGrid"
+                               ItemsSource="{x:Bind GroupedIcons}"
+                               IsItemClickEnabled="True"
+                               ItemClick="IconsGrid_ItemClick"
+                               SelectionMode="Single"
+                               IsMultiSelectCheckBoxEnabled="False"
+                               Padding="12,8,12,8">
+                    <muxc:GridView.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            CornerRadius="4"
+                                            Padding="8,4,8,4"
+                                            Margin="0,8,0,4">
+                                        <TextBlock Text="{Binding Key}"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="14"/>
+                                    </Border>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </muxc:GridView.GroupStyle>
+                    <muxc:GridView.ItemTemplate>
+                        <DataTemplate x:DataType="models:IconInfo">
+                            <controls:IconControl Icon="{x:Bind}" />
+                        </DataTemplate>
+                    </muxc:GridView.ItemTemplate>
+                    <muxc:GridView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid MaximumRowsOrColumns="0" 
+                                           Orientation="Horizontal"
+                                           AreStickyGroupHeadersEnabled="True"/>
+                        </ItemsPanelTemplate>
+                    </muxc:GridView.ItemsPanel>
+                </muxc:GridView>
+            </ScrollViewer>
+
+            <!-- 字母索引导航栏 -->
+            <Border Grid.Column="1"
+                    Width="32"
+                    Margin="4,8,8,8"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="16"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Hidden">
+                    <StackPanel x:Name="AlphabetIndexPanel"
+                                Padding="0,8,0,8"
+                                HorizontalAlignment="Center">
+                        <!-- 动态生成索引按钮 -->
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- 优化后的操作按钮区域 -->
+        <Border x:Name="ActionPanel" 
+                Grid.Row="2" 
+                Visibility="Collapsed"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,1,0,0">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                          VerticalScrollBarVisibility="Disabled">
+                <Grid Padding="20,12,20,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 左侧信息 -->
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal" 
+                                Spacing="8" 
+                                VerticalAlignment="Center"
+                                Margin="0,0,16,0">
+                        <FontIcon Glyph="&#xE8B7;" 
+                                  FontSize="16" 
+                                  VerticalAlignment="Center"/>
+                        <TextBlock x:Name="SelectedIconText"
+                                   Text="未选择图标"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- 右侧按钮组 -->
+                    <StackPanel Grid.Column="2"
+                               Orientation="Horizontal"
+                               Spacing="8">
+                        <Button x:Name="ApplyButton"
+                                Content="应用到文件夹"
+                                Click="ApplyButton_Click"
+                                MinWidth="120"
+                                Style="{StaticResource AccentButtonStyle}"/>
+                        <Button x:Name="ApplyAllButton"
+                                Content="应用到所有子文件夹"
+                                Click="ApplyAllButton_Click"
+                                MinWidth="140"/>
+                        <Button x:Name="ClearButton"
+                                Content="重置图标"
+                                Click="ClearButton_Click"
+                                MinWidth="100"/>
+                        <Button x:Name="ClearAllButton"
+                                Content="重置所有"
+                                Click="ClearAllButton_Click"
+                                MinWidth="100"/>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </Border>
     </Grid>
 </Page>

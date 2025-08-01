@@ -1,3 +1,4 @@
+using ChangeFolderIcon.Models;
 using ChangeFolderIcon.Pages;
 using ChangeFolderIcon.Utils.Events;
 using ChangeFolderIcon.Utils.Services;
@@ -11,6 +12,24 @@ using System.Threading.Tasks;
 
 namespace ChangeFolderIcon
 {
+    // 定义搜索结果模型
+    public class SearchResult
+    {
+        public string? DisplayName { get; set; }
+        public string? Path { get; set; } // 文件夹路径或图标路径
+        public SearchResultType Type { get; set; }
+        public object? OriginalItem { get; set; } // 原始对象 (IconInfo 或 NavigationViewItem)
+
+        // 根据类型返回不同的图标符号
+        public string IconGlyph => Type == SearchResultType.Folder ? "\uE8B7" : "\uE7B8";
+    }
+
+    public enum SearchResultType
+    {
+        Folder,
+        Icon
+    }
+
     public sealed partial class MainWindow : Window
     {
         private readonly FolderNavigationService _folderService = new();
@@ -21,17 +40,160 @@ namespace ChangeFolderIcon
             InitializeComponent();
 
             _iconsPage = new IconsPage();
-            _iconsPage.IconChanged += IconsPage_IconChanged;  // 订阅事件
+            _iconsPage.IconChanged += IconsPage_IconChanged;
             ContentFrame.Content = _iconsPage;
             _iconsPage.UpdateState(null);
 
-            // 监听面板状态变化
             NavView.PaneOpening += NavView_PaneStateChanged;
             NavView.PaneClosing += NavView_PaneStateChanged;
-
-            // 初始化面板状态
             UpdatePaneVisibility(NavView.IsPaneOpen);
+
+            // 订阅标题栏搜索框的事件
+            CustomTitleBarControl.TextChanged += CustomTitleBar_TextChanged;
+            CustomTitleBarControl.SuggestionChosen += CustomTitleBar_SuggestionChosen;
+            CustomTitleBarControl.QuerySubmitted += CustomTitleBar_QuerySubmitted;
         }
+
+        #region 搜索逻辑
+        // 当用户在搜索框中输入文本时
+        private void CustomTitleBar_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput) return;
+
+            var query = sender.Text.Trim();
+            if (string.IsNullOrEmpty(query))
+            {
+                sender.ItemsSource = null;
+                return;
+            }
+
+            var results = new List<SearchResult>();
+            // 搜索文件夹
+            SearchFolders(query, NavView.MenuItems, results);
+            // 搜索图标
+            SearchIcons(query, results);
+
+            sender.ItemsSource = results.Any() ? results : new List<SearchResult> { new SearchResult { DisplayName = "未找到结果" } };
+        }
+
+        // 搜索文件夹 (递归)
+        private void SearchFolders(string query, IList<object> menuItems, List<SearchResult> results)
+        {
+            foreach (var item in menuItems)
+            {
+                if (item is not NavigationViewItem nvi) continue;
+
+                if (nvi.Content?.ToString()?.Contains(query, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    results.Add(new SearchResult
+                    {
+                        DisplayName = nvi.Content.ToString(),
+                        Path = nvi.Tag as string,
+                        Type = SearchResultType.Folder,
+                        OriginalItem = nvi
+                    });
+                }
+
+                if (nvi.MenuItems.Any())
+                {
+                    SearchFolders(query, nvi.MenuItems, results);
+                }
+            }
+        }
+
+        // 搜索图标
+        private void SearchIcons(string query, List<SearchResult> results)
+        {
+            var matchingIcons = _iconsPage.Icons
+                .Where(icon => icon.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
+
+            foreach (var icon in matchingIcons)
+            {
+                results.Add(new SearchResult
+                {
+                    DisplayName = icon.Name,
+                    Path = icon.FullPath,
+                    Type = SearchResultType.Icon,
+                    OriginalItem = icon
+                });
+            }
+        }
+
+        // 当用户从建议列表中选择一项时
+        private void CustomTitleBar_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+        {
+            if (args.SelectedItem is SearchResult selectedResult)
+            {
+                NavigateToResult(selectedResult);
+            }
+        }
+
+        // 当用户提交查询时 (例如按 Enter)
+        private void CustomTitleBar_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            if (args.ChosenSuggestion is SearchResult selectedResult)
+            {
+                NavigateToResult(selectedResult);
+            }
+            else if (!string.IsNullOrEmpty(args.QueryText))
+            {
+                // 如果用户没有选择建议，而是直接按回车，则导航到第一个搜索结果
+                if (sender.ItemsSource is List<SearchResult> results && results.Any())
+                {
+                    NavigateToResult(results.First());
+                }
+            }
+        }
+
+        // 导航到选中的结果
+        private void NavigateToResult(SearchResult result)
+        {
+            if (result == null) return;
+
+            switch (result.Type)
+            {
+                case SearchResultType.Folder:
+                    if (result.Path == null) return;
+                    FindAndSelectNavItem(result.Path, NavView.MenuItems);
+                    break;
+                case SearchResultType.Icon:
+                    if (!ContentFrame.Content.Equals(_iconsPage))
+                    {
+                        ContentFrame.Content = _iconsPage;
+                    }
+                    _iconsPage.ScrollToIcon(result.OriginalItem as IconInfo);
+                    break;
+            }
+        }
+
+        // 查找并选中 NavigationViewItem (递归)
+        private bool FindAndSelectNavItem(string path, IList<object> items)
+        {
+            foreach (var obj in items)
+            {
+                if (obj is not NavigationViewItem nvi) continue;
+
+                // 找到匹配项
+                if (string.Equals(nvi.Tag as string, path, StringComparison.OrdinalIgnoreCase))
+                {
+                    nvi.IsSelected = true;
+                    return true;
+                }
+
+                // 在子项中递归查找
+                if (nvi.MenuItems.Any())
+                {
+                    if (FindAndSelectNavItem(path, nvi.MenuItems))
+                    {
+                        nvi.IsExpanded = true; // 展开父项
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        #endregion
 
         #region 面板状态管理
         private void NavView_PaneStateChanged(NavigationView sender, object args)
@@ -41,23 +203,10 @@ namespace ChangeFolderIcon
 
         private void UpdatePaneVisibility(bool isPaneOpen)
         {
-            // 更新按钮文字可见性
             SelectFolderButtonText.Visibility = isPaneOpen ? Visibility.Visible : Visibility.Collapsed;
-
-            // 更新分隔线可见性
             DividerLine.Visibility = isPaneOpen ? Visibility.Visible : Visibility.Collapsed;
-
-            // 更新选择文件夹按钮
             SelectFolderButton.Visibility = isPaneOpen ? Visibility.Visible : Visibility.Collapsed;
-
-            if (isPaneOpen)
-            {
-                SelectFolderButtonColum.Width = new GridLength(4, GridUnitType.Star);
-            }
-            else
-            {
-                SelectFolderButtonColum.Width = new GridLength(0, GridUnitType.Star);
-            }
+            SelectFolderButtonColum.Width = isPaneOpen ? new GridLength(4, GridUnitType.Star) : new GridLength(0, GridUnitType.Star);
         }
 
         private void PaneToggleButton_Click(object sender, RoutedEventArgs e)

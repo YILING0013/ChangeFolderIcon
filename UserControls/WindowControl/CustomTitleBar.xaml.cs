@@ -18,10 +18,6 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics;
 using WinRT.Interop;
-using Microsoft.UI.Xaml.Controls.AnimatedVisuals;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace ChangeFolderIcon.UserControls.WindowControl
 {
@@ -29,8 +25,19 @@ namespace ChangeFolderIcon.UserControls.WindowControl
     {
         private Window? _parentWindow;
         private AppWindow? _appWindow;
-
         private bool _firstLayoutHandled = false;
+
+        // 公开事件，以便 MainWindow 可以监听
+        public event TypedEventHandler<AutoSuggestBox, AutoSuggestBoxTextChangedEventArgs>? TextChanged;
+        public event TypedEventHandler<AutoSuggestBox, AutoSuggestBoxSuggestionChosenEventArgs>? SuggestionChosen;
+        public event TypedEventHandler<AutoSuggestBox, AutoSuggestBoxQuerySubmittedEventArgs>? QuerySubmitted;
+
+        // 公开 ItemsSource 属性
+        public object ItemsSource
+        {
+            get => TitleBarSearchBox.ItemsSource;
+            set => TitleBarSearchBox.ItemsSource = value;
+        }
 
         public CustomTitleBar()
         {
@@ -38,16 +45,18 @@ namespace ChangeFolderIcon.UserControls.WindowControl
             this.Loaded += OnLoaded;
             this.Unloaded += OnUnloaded;
             this.LayoutUpdated += OnLayoutUpdated;
+
+            // 将内部控件的事件连接到公共事件
+            TitleBarSearchBox.TextChanged += (s, a) => TextChanged?.Invoke(s, a);
+            TitleBarSearchBox.SuggestionChosen += (s, a) => SuggestionChosen?.Invoke(s, a);
+            TitleBarSearchBox.QuerySubmitted += (s, a) => QuerySubmitted?.Invoke(s, a);
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             // 尝试获取父窗口
             _parentWindow = GetParentWindow();
-            if (_parentWindow == null)
-            {
-                return;
-            }
+            if (_parentWindow == null) return;
 
             // 获取AppWindow
             var hWnd = WindowNative.GetWindowHandle(_parentWindow);
@@ -58,7 +67,6 @@ namespace ChangeFolderIcon.UserControls.WindowControl
             {
                 // 将内容扩展到标题栏区域
                 _appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-                // 设置系统按钮背景为透明
                 _appWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
                 _appWindow.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
                 _appWindow.SetIcon("Assets\\icon\\app_icon.ico");
@@ -83,7 +91,6 @@ namespace ChangeFolderIcon.UserControls.WindowControl
         }
 
         #region UI 事件 —— 首帧布局完成后再计算拖拽区
-
         /// <summary>
         /// 首帧真正完成 Measure/Arrange 时触发，仅执行一次。
         /// </summary>
@@ -91,8 +98,7 @@ namespace ChangeFolderIcon.UserControls.WindowControl
         {
             if (_firstLayoutHandled || _appWindow is null) return;
 
-            if (ActualWidth > 0 && ActualHeight > 0            // 自身大小有效
-                && TitleColumn.ActualWidth > 0)                // 关键列已测量
+            if (ActualWidth > 0 && ActualHeight > 0 && TitleColumn.ActualWidth > 0)
             {
                 UpdateDragRegions();
                 _firstLayoutHandled = true;
@@ -116,11 +122,7 @@ namespace ChangeFolderIcon.UserControls.WindowControl
         private void UpdateDragRegions()
         {
             if (_appWindow == null || _parentWindow == null) return;
-            // 确保控件已加载并具有实际大小，否则获取的坐标不准确
-            if (this.ActualWidth == 0 || this.ActualHeight == 0)
-            {
-                return;
-            }
+            if (this.ActualWidth == 0 || this.ActualHeight == 0) return;
 
             // 1. 获取DPI缩放比例
             double scale = DpiHelper.GetScaleAdjustment(_parentWindow);
@@ -140,13 +142,12 @@ namespace ChangeFolderIcon.UserControls.WindowControl
 
             if (rect1Width > 0)
             {
-                var rect1 = new RectInt32(
+                dragRects.Add(new RectInt32(
                     (int)(rect1X * scale),
                     0,
                     (int)(rect1Width * scale),
                     (int)(AppTitleBar.ActualHeight * scale)
-                );
-                dragRects.Add(rect1);
+                ));
             }
 
             // 计算第二个拖动区域 (搜索框右侧的空白区域)
@@ -157,13 +158,12 @@ namespace ChangeFolderIcon.UserControls.WindowControl
 
             if (rect2Width > 0)
             {
-                var rect2 = new RectInt32(
+                dragRects.Add(new RectInt32(
                     (int)(rect2X * scale),
                     0,
                     (int)(rect2Width * scale),
                     (int)(AppTitleBar.ActualHeight * scale)
-                );
-                dragRects.Add(rect2);
+                ));
             }
 
             // 4. 设置最终的可拖动区域

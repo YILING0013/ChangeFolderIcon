@@ -35,6 +35,20 @@ namespace ChangeFolderIcon.Pages
             UpdateHeaderAndActions();
         }
 
+        // 公共方法，用于从外部（如MainWindow）滚动到指定图标
+        public void ScrollToIcon(IconInfo? targetIcon)
+        {
+            if (targetIcon == null) return;
+
+            // 滚动到视图
+            IconsGrid.ScrollIntoView(targetIcon, ScrollIntoViewAlignment.Default);
+
+            // 选中该项以高亮显示
+            IconsGrid.SelectedItem = targetIcon;
+            _selectedIcon = targetIcon;
+            UpdateSelectedIconText();
+        }
+
         private void LoadIconsFromAssets()
         {
             string baseDir = AppContext.BaseDirectory;
@@ -52,17 +66,15 @@ namespace ChangeFolderIcon.Pages
         {
             _groupedCollection?.Clear();
 
-            // 优化分组逻辑，将所有数字开头的图标归入“0-9”组
             var groups = Icons.GroupBy(icon =>
             {
                 if (string.IsNullOrEmpty(icon.Name)) return "#";
                 char firstChar = char.ToUpper(icon.Name[0]);
-                if (char.IsDigit(firstChar)) return "0-9"; // 所有数字归为一组
+                if (char.IsDigit(firstChar)) return "0-9";
                 if (char.IsLetter(firstChar)) return firstChar.ToString();
                 return "#";
             }).OrderBy(g =>
             {
-                // 优化排序，使数字组在前，#组在后
                 if (g.Key == "#") return "ZZZ";
                 if (g.Key == "0-9") return "000";
                 return g.Key;
@@ -70,11 +82,9 @@ namespace ChangeFolderIcon.Pages
 
             foreach (var group in groups)
             {
-                // 为每个分组内的图标也进行排序
                 _groupedCollection?.Add(new IconGroup(group.Key, group.OrderBy(i => i.Name)));
             }
 
-            // 创建CollectionViewSource
             var cvs = new CollectionViewSource
             {
                 Source = _groupedCollection,
@@ -102,8 +112,6 @@ namespace ChangeFolderIcon.Pages
                     Margin = new Thickness(0, 2, 0, 2),
                     FontSize = 11,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    // 如果需要，可以取消注释并确保资源字典中有此样式
-                    // Style = (Style)Application.Current.Resources["SubtleButtonStyle"]
                 };
 
                 button.Click += (s, e) => OnIndexButtonClick(indexChar);
@@ -113,12 +121,9 @@ namespace ChangeFolderIcon.Pages
 
         private void OnIndexButtonClick(string index)
         {
-            // [修改] 直接使用私有字段 _groupedCollection
             var targetGroup = _groupedCollection?.FirstOrDefault(g => g.Key == index);
-
             if (targetGroup != null)
             {
-                // 直接滚动到分组的标题，而不是某个具体的项
                 IconsGrid.ScrollIntoView(targetGroup, ScrollIntoViewAlignment.Leading);
             }
         }
@@ -147,24 +152,15 @@ namespace ChangeFolderIcon.Pages
                 HeaderDescription.Text = _selectedFolderPath;
                 ActionPanel.Visibility = Visibility.Visible;
             }
-
             UpdateSelectedIconText();
         }
 
         private void UpdateSelectedIconText()
         {
-            if (_selectedIcon != null)
-            {
-                SelectedIconText.Text = $"已选择: {_selectedIcon.Name}";
-            }
-            else
-            {
-                SelectedIconText.Text = "未选择图标";
-            }
+            SelectedIconText.Text = _selectedIcon != null ? $"已选择: {_selectedIcon.Name}" : "未选择图标";
         }
         #endregion
 
-        // 当用户在 GridView 中点击一个图标时，更新 _selectedIcon
         private void IconsGrid_ItemClick(object sender, ItemClickEventArgs e)
         {
             _selectedIcon = e.ClickedItem as IconInfo;
@@ -175,7 +171,6 @@ namespace ChangeFolderIcon.Pages
         private async void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
             if (!CheckPreCondition()) return;
-
             try
             {
                 IconManager.SetFolderIcon(_selectedFolderPath!, _selectedIcon!.FullPath);
@@ -189,7 +184,6 @@ namespace ChangeFolderIcon.Pages
         {
             if (string.IsNullOrEmpty(_selectedFolderPath))
             { await ShowMsg("提示", "请在左侧导航中选择一个目标文件夹。"); return; }
-
             try
             {
                 IconManager.ClearFolderIcon(_selectedFolderPath!);
@@ -204,7 +198,6 @@ namespace ChangeFolderIcon.Pages
         private async void ApplyAllButton_Click(object sender, RoutedEventArgs e)
         {
             if (!CheckPreCondition()) return;
-
             int count = IconManager.ApplyIconToAllSubfolders(_selectedFolderPath!, _selectedIcon!.FullPath);
             RaiseForAllSubFolders(_selectedFolderPath!, _selectedIcon!.FullPath);
             await ShowMsg("完成", $"已为 {count} 个子文件夹应用图标。");
@@ -214,7 +207,6 @@ namespace ChangeFolderIcon.Pages
         {
             if (string.IsNullOrEmpty(_selectedFolderPath))
             { await ShowMsg("提示", "请先选择目标文件夹。"); return; }
-
             int count = IconManager.ClearIconRecursively(_selectedFolderPath!);
             RaiseForAllSubFolders(_selectedFolderPath!, null);
             await ShowMsg("完成", $"已清除 {count} 个文件夹（包括子文件夹）的图标。");
@@ -248,9 +240,7 @@ namespace ChangeFolderIcon.Pages
 
         private void RaiseForAllSubFolders(string root, string? iconPath)
         {
-            // 根目录本身
             IconChanged?.Invoke(this, new IconChangedEventArgs(root, iconPath));
-            // 所有子目录
             foreach (string dir in Directory.EnumerateDirectories(root, "*", SearchOption.AllDirectories))
             {
                 IconChanged?.Invoke(this, new IconChangedEventArgs(dir, iconPath));
@@ -259,11 +249,9 @@ namespace ChangeFolderIcon.Pages
         #endregion
     }
 
-    // 辅助类
     public class IconGroup : List<IconInfo>
     {
         public string Key { get; set; }
-
         public IconGroup(string key, IEnumerable<IconInfo> items) : base(items)
         {
             Key = key;

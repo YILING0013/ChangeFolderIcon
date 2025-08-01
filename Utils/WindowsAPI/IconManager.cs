@@ -1,74 +1,176 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ChangeFolderIcon.Utils.WindowsAPI
 {
+    /// <summary>
+    ///在文件夹上设置自定义图标的工具类
+    /// </summary>
     public static class IconManager
     {
-        // --- Win32 P/Invoke ---
-        [Flags]
-        private enum Win32FileAttributes : uint
-        {
-            ReadOnly = 0x00000001,
-            Hidden = 0x00000002,
-            System = 0x00000004,
-            Directory = 0x00000010,
-            Archive = 0x00000020,
-            Normal = 0x00000080,
-        }
+        #region P/Invoke Signatures and Constants
 
+        // --- Win32 P/Invoke for file attributes ---
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetFileAttributes(string lpFileName, Win32FileAttributes dwFileAttributes);
+        private static extern bool SetFileAttributes(string lpFileName, FileAttributes dwFileAttributes);
 
+        // --- Shell P/Invoke for notifications ---
         [DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
 
-        private const uint SHCNE_UPDATEITEM = 0x00002000;
-        private const uint SHCNE_UPDATEDIR = 0x00001000;
-        private const uint SHCNF_PATHW = 0x0005; // Use wide-character path
-        private const uint SHCNE_ASSOCCHANGED = 0x08000000;
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern IntPtr ILCreateFromPath(string pszPath);
 
+        [DllImport("ole32.dll", PreserveSig = false)]
+        private static extern void CoTaskMemFree(IntPtr pv);
+
+        // --- P/Invoke for the recommended SHGetSetFolderCustomSettings API ---
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern int SHGetSetFolderCustomSettings(ref SHFOLDERCUSTOMSETTINGS pfcs, string pszPath, uint dwReadWrite);
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        private struct SHFOLDERCUSTOMSETTINGS
+        {
+            public uint dwSize;
+            public uint dwMask;
+            public IntPtr pvid;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string pszWebViewTemplate;
+            public uint cchWebViewTemplate;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string pszWebViewTemplateVersion;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string pszInfoTip;
+            public uint cchInfoTip;
+            public IntPtr pclsid;
+            public uint dwFlags;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string pszIconFile;
+            public uint cchIconFile;
+            public int iIconIndex;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string pszLogo;
+            public uint cchLogo;
+        }
+
+        // --- P/Invoke for broadcasting system-wide setting changes ("nuclear option") ---
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern IntPtr SendMessageTimeout(
+            IntPtr hWnd,
+            uint Msg,
+            IntPtr wParam,
+            IntPtr lParam,
+            SendMessageTimeoutFlags fuFlags,
+            uint uTimeout,
+            out IntPtr lpdwResult);
+
+        [Flags]
+        private enum SendMessageTimeoutFlags : uint
+        {
+            SMTO_NORMAL = 0x0,
+            SMTO_BLOCK = 0x1,
+            SMTO_ABORTIFHUNG = 0x2,
+            SMTO_NOTIMEOUTIFNOTHUNG = 0x8,
+            SMTO_ERRORONEXIT = 0x20
+        }
+
+        // Constants for SHChangeNotify
+        private const uint SHCNE_UPDATEITEM = 0x2000;
+        private const uint SHCNE_UPDATEDIR = 0x1000;
+        private const uint SHCNE_ASSOCCHANGED = 0x08000000;
+        private const uint SHCNF_IDLIST = 0x0000;
+        private const uint SHCNF_FLUSH = 0x1000; // Waits for the notification to be processed.
+
+        // Constants for SHGetSetFolderCustomSettings
+        private const uint FCSM_ICONFILE = 0x00000010;
+        private const uint FCS_FORCEWRITE = 0x00000002; // Forces the write, even if settings are already present.
+        private const uint FCS_CLEAR = 0x00000004; // Clears custom settings.
+
+        // Constants for SendMessageTimeout
+        private const uint WM_SETTINGCHANGE = 0x1A;
+        private const int SPI_SETICONS = 0x58;
+        private static readonly IntPtr HWND_BROADCAST = new IntPtr(0xffff);
+
+        #endregion
 
         /// <summary>
-        /// 为单个文件夹设置图标。
+        /// 为单个文件夹设置图标，采用多种策略确保立即刷新
         /// </summary>
+        /// <param name="folderPath">目标文件夹的完整路径</param>
+        /// <param name="iconPath">图标文件的完整路径 (.ico)</param>
         public static void SetFolderIcon(string folderPath, string iconPath)
         {
-            if (string.IsNullOrWhiteSpace(folderPath) || string.IsNullOrWhiteSpace(iconPath))
-                throw new ArgumentException("Folder path or icon path cannot be empty.");
+            if (string.IsNullOrWhiteSpace(folderPath) || !Directory.Exists(folderPath))
+                throw new DirectoryNotFoundException("The specified folder does not exist.");
+            if (string.IsNullOrWhiteSpace(iconPath) || !File.Exists(iconPath))
+                throw new FileNotFoundException("The specified icon file does not exist.");
 
-            if (!Directory.Exists(folderPath)) throw new DirectoryNotFoundException(folderPath);
-            if (!File.Exists(iconPath)) throw new FileNotFoundException(iconPath);
+            // 1. 清理旧的图标文件
+            ClearOldIconFiles(folderPath);
 
-            // 1. 先清除旧设置，确保一个干净的状态。
-            ClearFolderIcon(folderPath, notify: false);
-
-            // 2. 将图标文件复制到目标文件夹内，命名为 folder.ico
-            string targetIconPath = Path.Combine(folderPath, "folder.ico");
+            // 2.为了破坏缓存，复制图标文件到目标文件夹并使用唯一的时间戳命名
+            string stamp = DateTime.UtcNow.Ticks.ToString();
+            string uniqueIconName = $"folder_{stamp}.ico";
+            string targetIconPath = Path.Combine(folderPath, uniqueIconName);
             File.Copy(iconPath, targetIconPath, true);
-            SetFileAttributes(targetIconPath, Win32FileAttributes.Hidden | Win32FileAttributes.System);
+            SetFileAttributes(targetIconPath, FileAttributes.Hidden | FileAttributes.System);
 
+            // 3.使用 SHGetSetFolderCustomSettings API
+            var fcs = new SHFOLDERCUSTOMSETTINGS
+            {
+                dwSize = (uint)Marshal.SizeOf<SHFOLDERCUSTOMSETTINGS>(),
+                dwMask = FCSM_ICONFILE,
+                pszIconFile = targetIconPath,
+                cchIconFile = (uint)targetIconPath.Length,
+                iIconIndex = 0
+            };
 
-            // 3. 写入 desktop.ini
-            string iniPath = Path.Combine(folderPath, "desktop.ini");
-            string iniContent = "[.ShellClassInfo]\r\n" +
-                                $"IconResource=folder.ico,0\r\n";
-            File.WriteAllText(iniPath, iniContent, Encoding.Unicode);
+            int hr = SHGetSetFolderCustomSettings(ref fcs, folderPath, FCS_FORCEWRITE);
+            Marshal.ThrowExceptionForHR(hr);
 
-            // 4. 设置 desktop.ini 和文件夹本身的属性
-            SetFileAttributes(iniPath, Win32FileAttributes.Hidden | Win32FileAttributes.System);
-            var folderAttrs = (Win32FileAttributes)File.GetAttributes(folderPath);
-            SetFileAttributes(folderPath, folderAttrs | Win32FileAttributes.ReadOnly);
+            var folderAttrs = File.GetAttributes(folderPath);
+            SetFileAttributes(folderPath, folderAttrs | FileAttributes.ReadOnly);
 
-            // 5. 通知系统刷新
-            NotifyExplorer(folderPath);
+            NotifyExplorerOfUpdate(folderPath);
         }
 
         /// <summary>
-        /// 递归应用图标到指定文件夹的所有子文件夹（不含自身）。
+        /// 删除/重置单个文件夹的自定义图标
+        /// </summary>
+        /// <param name="folderPath">目标文件夹路径</param>
+        public static void ClearFolderIcon(string folderPath)
+        {
+            if (string.IsNullOrWhiteSpace(folderPath) || !Directory.Exists(folderPath))
+                return;
+
+            // 1. 取消文件夹的只读属性，以便删除文件
+            var folderAttrs = File.GetAttributes(folderPath);
+            if (folderAttrs.HasFlag(FileAttributes.ReadOnly))
+            {
+                SetFileAttributes(folderPath, folderAttrs & ~FileAttributes.ReadOnly);
+            }
+
+            // 2. 清理旧的图标文件
+            ClearOldIconFiles(folderPath);
+
+            // 3. 删除 desktop.ini 文件
+            string iniPath = Path.Combine(folderPath, "desktop.ini");
+            if (File.Exists(iniPath))
+            {
+                SetFileAttributes(iniPath, FileAttributes.Normal);
+                File.Delete(iniPath);
+            }
+
+            // 4. 通知系统更新
+            NotifyExplorerOfUpdate(folderPath);
+        }
+
+        /// <summary>
+        /// 递归地为指定文件夹下的所有子文件夹应用图标
         /// </summary>
         public static int ApplyIconToAllSubfolders(string rootFolderPath, string iconPath)
         {
@@ -82,52 +184,17 @@ namespace ChangeFolderIcon.Utils.WindowsAPI
                     SetFolderIcon(sub, iconPath);
                     applied++;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // 忽略单个失败，继续
+                    // Log or handle individual failures
+                    Debug.WriteLine($"Failed to set icon for {sub}: {ex.Message}");
                 }
             }
             return applied;
         }
 
         /// <summary>
-        /// 删除/重置单个文件夹图标
-        /// </summary>
-        public static void ClearFolderIcon(string folderPath, bool notify = true)
-        {
-            string iniPath = Path.Combine(folderPath, "desktop.ini");
-            string iconInFolderPath = Path.Combine(folderPath, "folder.ico");
-
-            // 取消文件夹只读属性以便操作
-            var folderAttrs = (Win32FileAttributes)File.GetAttributes(folderPath);
-            if (folderAttrs.HasFlag(Win32FileAttributes.ReadOnly))
-            {
-                SetFileAttributes(folderPath, folderAttrs & ~Win32FileAttributes.ReadOnly);
-            }
-
-            // 删除 desktop.ini
-            if (File.Exists(iniPath))
-            {
-                SetFileAttributes(iniPath, Win32FileAttributes.Normal);
-                File.Delete(iniPath);
-            }
-
-            // 删除文件夹内的图标副本
-            if (File.Exists(iconInFolderPath))
-            {
-                SetFileAttributes(iconInFolderPath, Win32FileAttributes.Normal);
-                File.Delete(iconInFolderPath);
-            }
-
-
-            if (notify)
-            {
-                NotifyExplorer(folderPath);
-            }
-        }
-
-        /// <summary>
-        /// 对子目录递归重置。
+        /// 递归地清除指定文件夹及其所有子文件夹的自定义图标
         /// </summary>
         public static int ClearIconRecursively(string rootFolderPath)
         {
@@ -140,35 +207,103 @@ namespace ChangeFolderIcon.Utils.WindowsAPI
             {
                 try { ClearFolderIcon(dir); count++; } catch { /* ignore */ }
             }
-            // 自身也清理
-            try { ClearFolderIcon(rootFolderPath); count++; } catch { }
+            // 也清理根目录自身
+            try { ClearFolderIcon(rootFolderPath); count++; } catch { /* ignore */ }
 
             return count;
         }
 
 
-        private static void NotifyExplorer(string path)
+        /// <summary>
+        /// 多层次的通知以确保 Explorer 图标被刷新
+        /// </summary>
+        private static void NotifyExplorerOfUpdate(string path)
         {
-            // 使用 UnmanagedString 类确保非托管内存被正确释放
-            using (var pathPtr = new UnmanagedString(path))
+            IntPtr pidl = IntPtr.Zero;
+            try
             {
-                // 通知具体项目更新
-                SHChangeNotify(SHCNE_UPDATEITEM, SHCNF_PATHW, pathPtr.Pointer, IntPtr.Zero);
-                // 通知目录内容变化
-                SHChangeNotify(SHCNE_UPDATEDIR, SHCNF_PATHW, pathPtr.Pointer, IntPtr.Zero);
+                pidl = ILCreateFromPath(path);
+                if (pidl == IntPtr.Zero) return;
+
+                // 1.SHCNF_IDLIST | SHCNF_FLUSH 发送同步通知
+                const uint flags = SHCNF_IDLIST | SHCNF_FLUSH;
+                SHChangeNotify(SHCNE_UPDATEITEM, flags, pidl, IntPtr.Zero);
+                SHChangeNotify(SHCNE_UPDATEDIR, flags, pidl, IntPtr.Zero);
+                SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST | SHCNF_FLUSH, IntPtr.Zero, IntPtr.Zero);
             }
-            // 强制刷新所有关联
-            SHChangeNotify(SHCNE_ASSOCCHANGED, 0, IntPtr.Zero, IntPtr.Zero);
+            finally
+            {
+                if (pidl != IntPtr.Zero)
+                {
+                    CoTaskMemFree(pidl);
+                }
+            }
+
+            // 2.调用 ie4uinit.exe -show
+            RefreshIconCacheViaIe4uinit();
+
+            // 3.广播 WM_SETTINGCHANGE 消息，强制所有程序重载系统图标
+            SendMessageTimeout(
+                HWND_BROADCAST,
+                WM_SETTINGCHANGE,
+                (IntPtr)SPI_SETICONS,
+                IntPtr.Zero,
+                SendMessageTimeoutFlags.SMTO_ABORTIFHUNG,
+                1000,
+                out _);
         }
 
         /// <summary>
-        /// 一个辅助类，用于管理传递给非托管代码的字符串指针，确保内存被释放。
+        /// 删除文件夹内所有先前生成的图标文件
         /// </summary>
-        private sealed class UnmanagedString : IDisposable
+        private static void ClearOldIconFiles(string folderPath)
         {
-            public IntPtr Pointer { get; }
-            public UnmanagedString(string str) => Pointer = Marshal.StringToHGlobalUni(str);
-            public void Dispose() => Marshal.FreeHGlobal(Pointer);
+            try
+            {
+                var oldIcons = Directory.EnumerateFiles(folderPath, "folder_*.ico");
+                foreach (var oldIcon in oldIcons)
+                {
+                    SetFileAttributes(oldIcon, FileAttributes.Normal);
+                    File.Delete(oldIcon);
+                }
+                // Also handle the legacy "folder.ico"
+                string legacyIconPath = Path.Combine(folderPath, "folder.ico");
+                if (File.Exists(legacyIconPath))
+                {
+                    SetFileAttributes(legacyIconPath, FileAttributes.Normal);
+                    File.Delete(legacyIconPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error clearing old icon files in {folderPath}: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 调用 ie4uinit.exe 来强制刷新图标缓存
+        /// </summary>
+        private static void RefreshIconCacheViaIe4uinit()
+        {
+            try
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "ie4uinit.exe",
+                    // For Win 10/11, use -show. For older systems, -ClearIconCache might be used.
+                    Arguments = "-show",
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+                Process.Start(startInfo)?.WaitForExit(1000);
+            }
+            catch (Exception ex)
+            {
+                // This can fail if the exe is not found or permissions are insufficient.
+                // It's an optional step, so we just log the error and continue.
+                Debug.WriteLine($"Failed to run ie4uinit.exe: {ex.Message}");
+            }
         }
     }
 }

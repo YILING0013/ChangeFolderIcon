@@ -23,7 +23,7 @@
         <NavigationView x:Name="NavView"
                         SelectionChanged="NavView_SelectionChanged"
                         Grid.Row="1"
-                        Margin="0,1,0,0"
+                        Margin="0,2,0,0"
                         PaneDisplayMode="Left"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="False"
@@ -39,8 +39,8 @@
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="4*"/>
+                            <ColumnDefinition x:Name="PaneToggleButtonColum" Width="*"/>
+                            <ColumnDefinition x:Name="SelectFolderButtonColum" Width="4*"/>
                         </Grid.ColumnDefinitions>
                         <!-- 自定义导航按钮 -->
                         <Button x:Name="PaneToggleButton"

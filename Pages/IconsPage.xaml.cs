@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,17 +17,18 @@ namespace ChangeFolderIcon.Pages
     public sealed partial class IconsPage : Page
     {
         public ObservableCollection<IconInfo> Icons { get; } = new();
-        public ICollectionView GroupedIcons { get; private set; }
+        public ICollectionView? GroupedIcons { get; private set; }
 
         private string? _selectedFolderPath;
         private IconInfo? _selectedIcon;
+        private readonly List<IconGroup>? _groupedCollection = new();
 
         // 通知 MainWindow 图标已更改的事件
         public event EventHandler<IconChangedEventArgs>? IconChanged;
 
         public IconsPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
             LoadIconsFromAssets();
             SetupGrouping();
             SetupAlphabetIndex();
@@ -48,32 +50,34 @@ namespace ChangeFolderIcon.Pages
 
         private void SetupGrouping()
         {
-            // 创建分组的集合
-            var groupedCollection = new List<IconGroup>();
+            _groupedCollection?.Clear();
 
-            // 按首字母分组
+            // 优化分组逻辑，将所有数字开头的图标归入“0-9”组
             var groups = Icons.GroupBy(icon =>
             {
                 if (string.IsNullOrEmpty(icon.Name)) return "#";
                 char firstChar = char.ToUpper(icon.Name[0]);
-                if (char.IsDigit(firstChar)) return firstChar.ToString();
+                if (char.IsDigit(firstChar)) return "0-9"; // 所有数字归为一组
                 if (char.IsLetter(firstChar)) return firstChar.ToString();
                 return "#";
             }).OrderBy(g =>
             {
-                if (g.Key == "#") return "ZZZ"; // 放到最后
+                // 优化排序，使数字组在前，#组在后
+                if (g.Key == "#") return "ZZZ";
+                if (g.Key == "0-9") return "000";
                 return g.Key;
             });
 
             foreach (var group in groups)
             {
-                groupedCollection.Add(new IconGroup(group.Key, group));
+                // 为每个分组内的图标也进行排序
+                _groupedCollection?.Add(new IconGroup(group.Key, group.OrderBy(i => i.Name)));
             }
 
             // 创建CollectionViewSource
             var cvs = new CollectionViewSource
             {
-                Source = groupedCollection,
+                Source = _groupedCollection,
                 IsSourceGrouped = true
             };
 
@@ -95,10 +99,11 @@ namespace ChangeFolderIcon.Pages
                     Width = 24,
                     Height = 24,
                     Padding = new Thickness(0),
-                    Margin = new Thickness(0,2,0,2),
+                    Margin = new Thickness(0, 2, 0, 2),
                     FontSize = 11,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    //Style = (Style)Application.Current.Resources["SubtleButtonStyle"]
+                    // 如果需要，可以取消注释并确保资源字典中有此样式
+                    // Style = (Style)Application.Current.Resources["SubtleButtonStyle"]
                 };
 
                 button.Click += (s, e) => OnIndexButtonClick(indexChar);
@@ -108,33 +113,13 @@ namespace ChangeFolderIcon.Pages
 
         private void OnIndexButtonClick(string index)
         {
-            IconInfo? targetItem = null;
+            // [修改] 直接使用私有字段 _groupedCollection
+            var targetGroup = _groupedCollection?.FirstOrDefault(g => g.Key == index);
 
-            if (index == "0-9")
+            if (targetGroup != null)
             {
-                // 查找第一个以数字开头的图标
-                targetItem = Icons.FirstOrDefault(icon =>
-                    !string.IsNullOrEmpty(icon.Name) && char.IsDigit(icon.Name[0]));
-            }
-            else if (index == "#")
-            {
-                // 查找第一个非字母数字开头的图标
-                targetItem = Icons.FirstOrDefault(icon =>
-                    string.IsNullOrEmpty(icon.Name) ||
-                    (!char.IsLetterOrDigit(icon.Name[0])));
-            }
-            else
-            {
-                // 查找第一个以指定字母开头的图标
-                char targetChar = index[0];
-                targetItem = Icons.FirstOrDefault(icon =>
-                    !string.IsNullOrEmpty(icon.Name) &&
-                    char.ToUpper(icon.Name[0]) == targetChar);
-            }
-
-            if (targetItem != null)
-            {
-                IconsGrid.ScrollIntoView(targetItem, ScrollIntoViewAlignment.Leading);
+                // 直接滚动到分组的标题，而不是某个具体的项
+                IconsGrid.ScrollIntoView(targetGroup, ScrollIntoViewAlignment.Leading);
             }
         }
 

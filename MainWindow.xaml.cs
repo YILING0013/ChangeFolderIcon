@@ -47,14 +47,16 @@ namespace ChangeFolderIcon
             // 更新分隔线可见性
             DividerLine.Visibility = isPaneOpen ? Visibility.Visible : Visibility.Collapsed;
 
-            // 更新选择文件夹按钮的边距
+            // 更新选择文件夹按钮
+            SelectFolderButton.Visibility = isPaneOpen ? Visibility.Visible : Visibility.Collapsed;
+
             if (isPaneOpen)
             {
-                SelectFolderButton.Margin = new Thickness(4, 4, 4, 4);
+                SelectFolderButtonColum.Width = new GridLength(4, GridUnitType.Star);
             }
             else
             {
-                SelectFolderButton.Margin = new Thickness(4, 4, 4, 8);
+                SelectFolderButtonColum.Width = new GridLength(0, GridUnitType.Star);
             }
         }
 

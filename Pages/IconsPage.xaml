@@ -17,7 +17,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- 优化后的Header区域 -->
+        <!-- Header区域 -->
         <Border Grid.Row="0" 
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -56,47 +56,44 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- 图标网格 -->
-            <ScrollViewer x:Name="IconScrollViewer"
-                          Grid.Column="0"
-                          VerticalScrollBarVisibility="Auto">
-                <muxc:GridView x:Name="IconsGrid"
-                               ItemsSource="{x:Bind GroupedIcons}"
-                               IsItemClickEnabled="True"
-                               ItemClick="IconsGrid_ItemClick"
-                               SelectionMode="Single"
-                               IsMultiSelectCheckBoxEnabled="False"
-                               Padding="12,8,12,8">
-                    <muxc:GridView.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.HeaderTemplate>
-                                <DataTemplate>
-                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                            CornerRadius="4"
-                                            Padding="8,4,8,4"
-                                            Margin="0,8,0,4">
-                                        <TextBlock Text="{Binding Key}"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="14"/>
-                                    </Border>
-                                </DataTemplate>
-                            </GroupStyle.HeaderTemplate>
-                        </GroupStyle>
-                    </muxc:GridView.GroupStyle>
-                    <muxc:GridView.ItemTemplate>
-                        <DataTemplate x:DataType="models:IconInfo">
-                            <controls:IconControl Icon="{x:Bind}" />
-                        </DataTemplate>
-                    </muxc:GridView.ItemTemplate>
-                    <muxc:GridView.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <ItemsWrapGrid MaximumRowsOrColumns="0" 
-                                           Orientation="Horizontal"
-                                           AreStickyGroupHeadersEnabled="True"/>
-                        </ItemsPanelTemplate>
-                    </muxc:GridView.ItemsPanel>
-                </muxc:GridView>
-            </ScrollViewer>
+            <muxc:GridView x:Name="IconsGrid"
+                           Grid.Column="0"
+                           ItemsSource="{x:Bind GroupedIcons}"
+                           IsItemClickEnabled="True"
+                           ItemClick="IconsGrid_ItemClick"
+                           SelectionMode="Single"
+                           IsMultiSelectCheckBoxEnabled="False"
+                           Padding="12,8,12,8"
+                           ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <muxc:GridView.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        CornerRadius="4"
+                                        Padding="8,4,8,4"
+                                        Margin="0,8,0,4">
+                                    <TextBlock Text="{Binding Key}"
+                                               FontWeight="SemiBold"
+                                               FontSize="14"/>
+                                </Border>
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </muxc:GridView.GroupStyle>
+                <muxc:GridView.ItemTemplate>
+                    <DataTemplate x:DataType="models:IconInfo">
+                        <controls:IconControl Icon="{x:Bind}" />
+                    </DataTemplate>
+                </muxc:GridView.ItemTemplate>
+                <muxc:GridView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ItemsWrapGrid MaximumRowsOrColumns="0" 
+                                       Orientation="Horizontal"
+                                       AreStickyGroupHeadersEnabled="True"/>
+                    </ItemsPanelTemplate>
+                </muxc:GridView.ItemsPanel>
+            </muxc:GridView>
 
             <!-- 字母索引导航栏 -->
             <Border Grid.Column="1"

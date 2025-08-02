@@ -201,11 +201,23 @@
     <value>请选择文件夹</value>
     <comment>IconPage页的头部提示词</comment>
   </data>
+  <data name="IconPageHeaderTitleText" xml:space="preserve">
+    <value>请选择文件夹</value>
+    <comment>IconPage页的头部提示词</comment>
+  </data>
   <data name="IconPageHeaderDescription.Text" xml:space="preserve">
     <value>从左侧导航栏选择文件夹，或直接拖拽文件夹到图标上</value>
     <comment>IconPage页的头部详细说明文本</comment>
   </data>
+  <data name="IconPageHeaderDescriptionText" xml:space="preserve">
+    <value>从左侧导航栏选择文件夹，或直接拖拽文件夹到图标上</value>
+    <comment>IconPage页的头部详细说明文本</comment>
+  </data>
   <data name="IconPageSelectedIconText.Text" xml:space="preserve">
+    <value>未选择图标</value>
+    <comment>IconPage页的底部提示文本</comment>
+  </data>
+  <data name="IconPageSelectedIconTextText" xml:space="preserve">
     <value>未选择图标</value>
     <comment>IconPage页的底部提示文本</comment>
   </data>
@@ -284,5 +296,145 @@
   <data name="IconControlTip.Text" xml:space="preserve">
     <value>释放以应用</value>
     <comment>图标控件拖入文件夹后提示词</comment>
+  </data>
+  <data name="SettingsPage_Title.Text" xml:space="preserve">
+    <value>设置</value>
+    <comment>设置页面标题</comment>
+  </data>
+  <data name="SettingsPage_Subtitle.Text" xml:space="preserve">
+    <value>自定义您的应用体验</value>
+    <comment>设置页面副标题</comment>
+  </data>
+  <data name="SettingsPage_Language.Text" xml:space="preserve">
+    <value>语言</value>
+    <comment>语言设置标题</comment>
+  </data>
+  <data name="SettingsPage_Language_Description.Text" xml:space="preserve">
+    <value>选择应用程序的显示语言</value>
+    <comment>语言设置描述</comment>
+  </data>
+  <data name="SettingsPage_Language_English.Text" xml:space="preserve">
+    <value>English</value>
+    <comment>英语选项</comment>
+  </data>
+  <data name="SettingsPage_Language_Chinese.Text" xml:space="preserve">
+    <value>简体中文</value>
+    <comment>中文选项</comment>
+  </data>
+  <data name="SettingsPage_Language_RestartInfo.Title" xml:space="preserve">
+    <value>需要重启</value>
+    <comment>重启提示标题</comment>
+  </data>
+  <data name="SettingsPage_Language_RestartInfo.Message" xml:space="preserve">
+    <value>请重启应用程序以应用语言更改。</value>
+    <comment>重启提示消息</comment>
+  </data>
+  <data name="SettingsPage_Appearance.Text" xml:space="preserve">
+    <value>外观</value>
+    <comment>外观设置标题</comment>
+  </data>
+  <data name="SettingsPage_Theme.Text" xml:space="preserve">
+    <value>应用主题</value>
+    <comment>主题设置标题</comment>
+  </data>
+  <data name="SettingsPage_Theme_Light.Text" xml:space="preserve">
+    <value>浅色</value>
+    <comment>浅色主题选项</comment>
+  </data>
+  <data name="SettingsPage_Theme_Dark.Text" xml:space="preserve">
+    <value>深色</value>
+    <comment>深色主题选项</comment>
+  </data>
+  <data name="SettingsPage_Theme_System.Text" xml:space="preserve">
+    <value>使用系统设置</value>
+    <comment>跟随系统主题选项</comment>
+  </data>
+  <data name="SettingsPage_Backdrop.Text" xml:space="preserve">
+    <value>窗口背景效果</value>
+    <comment>背景效果标题</comment>
+  </data>
+  <data name="SettingsPage_Backdrop_Description.Text" xml:space="preserve">
+    <value>选择窗口背景的视觉效果</value>
+    <comment>背景效果描述</comment>
+  </data>
+  <data name="SettingsPage_Backdrop_Mica.Text" xml:space="preserve">
+    <value>云母效果</value>
+    <comment>云母效果选项</comment>
+  </data>
+  <data name="SettingsPage_Backdrop_Mica_Description.Text" xml:space="preserve">
+    <value>根据桌面壁纸自适应的细微透明效果</value>
+    <comment>云母效果描述</comment>
+  </data>
+  <data name="SettingsPage_Backdrop_Acrylic.Text" xml:space="preserve">
+    <value>亚克力效果</value>
+    <comment>亚克力效果选项</comment>
+  </data>
+  <data name="SettingsPage_Backdrop_Acrylic_Description.Text" xml:space="preserve">
+    <value>模糊透明效果</value>
+    <comment>亚克力效果描述</comment>
+  </data>
+  <data name="SettingsPage_Backdrop_Transparent.Text" xml:space="preserve">
+    <value>无效果</value>
+    <comment>无背景效果选项</comment>
+  </data>
+  <data name="SettingsPage_Backdrop_Transparent_Description.Text" xml:space="preserve">
+    <value>不使用透明效果</value>
+    <comment>无背景效果描述</comment>
+  </data>
+  <data name="SettingsPage_IconPack.Text" xml:space="preserve">
+    <value>图标包</value>
+    <comment>图标包设置标题</comment>
+  </data>
+  <data name="SettingsPage_IconPack_Description.Text" xml:space="preserve">
+    <value>从 GitHub 仓库管理图标包</value>
+    <comment>图标包设置描述</comment>
+  </data>
+  <data name="SettingsPage_IconPack_Update.Text" xml:space="preserve">
+    <value>检查更新</value>
+    <comment>检查更新按钮文本</comment>
+  </data>
+  <data name="SettingsPage_About.Text" xml:space="preserve">
+    <value>关于</value>
+    <comment>关于部分标题</comment>
+  </data>
+  <data name="SettingsPage_AppName.Text" xml:space="preserve">
+    <value>Change Folder Icon</value>
+    <comment>应用程序名称</comment>
+  </data>
+  <data name="SettingsPage_Version.Text" xml:space="preserve">
+    <value>版本 1.0.0</value>
+    <comment>Version 1.0.0</comment>
+  </data>
+  <data name="SettingsPage_GitHub.Content" xml:space="preserve">
+    <value>在 GitHub 上查看</value>
+    <comment>GitHub链接文本</comment>
+  </data>
+  <data name="IconPackStatus_Checking" xml:space="preserve">
+    <value>正在检查更新...</value>
+    <comment>检查更新状态</comment>
+  </data>
+  <data name="IconPackStatus_Downloading" xml:space="preserve">
+    <value>正在下载图标包...</value>
+    <comment>下载状态</comment>
+  </data>
+  <data name="IconPackStatus_Extracting" xml:space="preserve">
+    <value>正在解压文件...</value>
+    <comment>解压状态</comment>
+  </data>
+  <data name="IconPackStatus_UpToDate" xml:space="preserve">
+    <value>图标包已是最新版本</value>
+    <comment>已是最新状态</comment>
+  </data>
+  <data name="IconPackStatus_Updated" xml:space="preserve">
+    <value>图标包更新成功</value>
+    <comment>更新成功状态</comment>
+  </data>
+  <data name="IconPackStatus_Error" xml:space="preserve">
+    <value>更新图标包时出错</value>
+    <comment>更新错误状态</comment>
+  </data>
+  <data name="IconPackStatus_NoInternet" xml:space="preserve">
+    <value>无网络连接</value>
+    <comment>无网络连接状态</comment>
   </data>
 </root>

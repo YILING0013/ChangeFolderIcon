@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+﻿using ChangeFolderIcon.Utils.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -11,6 +7,11 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -24,16 +25,47 @@ namespace ChangeFolderIcon
     public partial class App : Application
     {
         public static Window? window;
+        public static SettingsService? SettingsService { get; private set; }
+        public static IconPackService? IconPackService { get; private set; }
 
         public App()
         {
             InitializeComponent();
+            SettingsService = new SettingsService();
+            IconPackService = new IconPackService(SettingsService.Settings.IconPackRepo, SettingsService.Settings.IconRepoLocalPath);
+
+            ApplyLanguageSetting();
         }
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             window = new MainWindow();
+
+            ApplyThemeAndBackdropSetting();
+            _ = IconPackService?.UpdateIconPackAsync();
             window.Activate();
+        }
+
+        private void ApplyLanguageSetting()
+        {
+            if (SettingsService == null)
+            {
+                throw new InvalidOperationException("SettingsService is not initialized.");
+            }
+            LanguageService.SetLanguage(SettingsService.Settings.Language);
+        }
+
+        private void ApplyThemeAndBackdropSetting()
+        {
+            if (window is MainWindow mainWindow && SettingsService != null)
+            {
+                SettingsService.ApplyTheme(mainWindow, SettingsService.Settings.Theme);
+                SettingsService.ApplyBackdrop(mainWindow, SettingsService.Settings.Backdrop);
+            }
+            else
+            {
+                throw new InvalidOperationException("Window or SettingsService is not initialized.");
+            }
         }
     }
 }

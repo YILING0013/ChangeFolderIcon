@@ -4,6 +4,7 @@ using ChangeFolderIcon.Utils.Events;
 using ChangeFolderIcon.Utils.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.ApplicationModel.Resources;
 using System;
 using System.Collections.Generic;
@@ -36,12 +37,14 @@ namespace ChangeFolderIcon
         private readonly FolderNavigationService _folderService = new();
         private readonly IconsPage _iconsPage;
         private ResourceLoader resourceLoader = new();
+        private readonly SettingsPage? _settingsPage;
 
         public MainWindow()
         {
             InitializeComponent();
 
             _iconsPage = new IconsPage();
+            _settingsPage = new SettingsPage();
             _iconsPage.IconChanged += IconsPage_IconChanged;
             ContentFrame.Content = _iconsPage;
             _iconsPage.UpdateState(null);
@@ -54,6 +57,8 @@ namespace ChangeFolderIcon
             CustomTitleBarControl.TextChanged += CustomTitleBar_TextChanged;
             CustomTitleBarControl.SuggestionChosen += CustomTitleBar_SuggestionChosen;
             CustomTitleBarControl.QuerySubmitted += CustomTitleBar_QuerySubmitted;
+
+            CustomTitleBarControl.SettingsClicked += OnSettingsClicked;
         }
 
         #region 搜索逻辑
@@ -324,6 +329,40 @@ namespace ChangeFolderIcon
                     return found;
             }
             return null;
+        }
+        #endregion
+
+        #region 设置窗口相关方法
+        public void SetBackdrop(string backdropType)
+        {
+            switch (backdropType.ToLower())
+            {
+                case "acrylic":
+                    SystemBackdrop = new DesktopAcrylicBackdrop();
+                    break;
+                case "transparent":
+                    SystemBackdrop = null;
+                    break;
+                case "mica":
+                default:
+                    SystemBackdrop = new MicaBackdrop();
+                    break;
+            }
+        }
+
+        private void OnSettingsClicked(object? sender, EventArgs e)
+        {
+            if (ContentFrame.Content is SettingsPage)
+            {
+                // 如果当前已经是设置页，则返回主页（图标页）
+                ContentFrame.Content = _iconsPage;
+                NavView.IsPaneVisible = true;
+            }
+            else
+            {
+                ContentFrame.Content = _settingsPage;
+                NavView.IsPaneVisible = false;
+            }
         }
         #endregion
     }

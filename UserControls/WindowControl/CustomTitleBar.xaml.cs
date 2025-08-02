@@ -32,6 +32,8 @@ namespace ChangeFolderIcon.UserControls.WindowControl
         public event TypedEventHandler<AutoSuggestBox, AutoSuggestBoxSuggestionChosenEventArgs>? SuggestionChosen;
         public event TypedEventHandler<AutoSuggestBox, AutoSuggestBoxQuerySubmittedEventArgs>? QuerySubmitted;
 
+        public event EventHandler? SettingsClicked;
+
         // 公开 ItemsSource 属性
         public object ItemsSource
         {
@@ -194,6 +196,8 @@ namespace ChangeFolderIcon.UserControls.WindowControl
         /// </summary>
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
+            // 触发事件
+            SettingsClicked?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

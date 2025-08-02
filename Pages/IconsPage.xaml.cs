@@ -1,10 +1,11 @@
 ﻿using ChangeFolderIcon.Models;
 using ChangeFolderIcon.Utils.Events;
+using ChangeFolderIcon.Utils.Services;
 using ChangeFolderIcon.Utils.WindowsAPI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.UI.Xaml.Data;
+using Microsoft.Windows.ApplicationModel.Resources;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,6 +25,7 @@ namespace ChangeFolderIcon.Pages
         private IconInfo? _selectedIcon;
         private readonly List<IconGroup>? _groupedCollection = new();
         private ResourceLoader resourceLoader = new();
+        private readonly SettingsService? _settingsService;
 
         // 通知 MainWindow 图标已更改的事件
         public event EventHandler<IconChangedEventArgs>? IconChanged;
@@ -31,6 +33,7 @@ namespace ChangeFolderIcon.Pages
         public IconsPage()
         {
             this.InitializeComponent();
+            _settingsService = App.SettingsService;
             LoadIconsFromAssets();
             SetupGrouping();
             SetupAlphabetIndex();
@@ -53,14 +56,13 @@ namespace ChangeFolderIcon.Pages
 
         private void LoadIconsFromAssets()
         {
-            string baseDir = AppContext.BaseDirectory;
-            string icoDir = Path.Combine(baseDir, "Assets", "ico");
-            if (!Directory.Exists(icoDir)) return;
-
-            foreach (string ico in Directory.EnumerateFiles(icoDir, "*.ico"))
+            if (_settingsService?.Settings?.IconPackPath is string icoDir && Directory.Exists(icoDir))
             {
-                try { Icons.Add(IconInfo.FromPath(ico)); }
-                catch { /* ignore */ }
+                foreach (string ico in Directory.EnumerateFiles(icoDir, "*.ico"))
+                {
+                    try { Icons.Add(IconInfo.FromPath(ico)); }
+                    catch { /* ignore */ }
+                }
             }
         }
 
@@ -143,8 +145,8 @@ namespace ChangeFolderIcon.Pages
             if (string.IsNullOrEmpty(_selectedFolderPath))
             {
                 HeaderIcon.Glyph = "\uE946";
-                HeaderTitle.Text = resourceLoader.GetString("IconPageHeaderTitle.Text");
-                HeaderDescription.Text = resourceLoader.GetString("IconPageHeaderDescription.Text");
+                HeaderTitle.Text = resourceLoader.GetString("IconPageHeaderTitleText");
+                HeaderDescription.Text = resourceLoader.GetString("IconPageHeaderDescriptionText");
                 ActionPanel.Visibility = Visibility.Collapsed;
             }
             else
@@ -159,7 +161,7 @@ namespace ChangeFolderIcon.Pages
 
         private void UpdateSelectedIconText()
         {
-            SelectedIconText.Text = _selectedIcon != null ? resourceLoader.GetString("Selected") + _selectedIcon.Name : resourceLoader.GetString("IconPageSelectedIconText.Text");
+            SelectedIconText.Text = _selectedIcon != null ? resourceLoader.GetString("Selected") + _selectedIcon.Name : resourceLoader.GetString("IconPageSelectedIconTextText");
         }
         #endregion
 

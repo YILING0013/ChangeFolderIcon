@@ -180,10 +180,19 @@
   <data name="IconPageHeaderTitle.Text" xml:space="preserve">
     <value>Please select a folder</value>
   </data>
+  <data name="IconPageHeaderTitleText" xml:space="preserve">
+    <value>Please select a folder</value>
+  </data>
   <data name="IconPageHeaderDescription.Text" xml:space="preserve">
     <value>Select a folder from the left navigation bar, or drag and drop a folder onto the icon</value>
   </data>
+  <data name="IconPageHeaderDescriptionText" xml:space="preserve">
+    <value>Select a folder from the left navigation bar, or drag and drop a folder onto the icon</value>
+  </data>
   <data name="IconPageSelectedIconText.Text" xml:space="preserve">
+    <value>No icon selected.</value>
+  </data>
+  <data name="IconPageSelectedIconTextText" xml:space="preserve">
     <value>No icon selected.</value>
   </data>
   <data name="IconPageApplyButton.Content" xml:space="preserve">
@@ -242,5 +251,110 @@
   </data>
   <data name="IconControlTip.Text" xml:space="preserve">
     <value>Release to apply</value>
+  </data>
+  <data name="SettingsPage_Title.Text" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="SettingsPage_Subtitle.Text" xml:space="preserve">
+    <value>Customize your app experience</value>
+  </data>
+  <data name="SettingsPage_Language.Text" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="SettingsPage_Language_Description.Text" xml:space="preserve">
+    <value>Choose the display language for the application</value>
+  </data>
+  <data name="SettingsPage_Language_English.Text" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="SettingsPage_Language_Chinese.Text" xml:space="preserve">
+    <value>简体中文</value>
+  </data>
+  <data name="SettingsPage_Language_RestartInfo.Title" xml:space="preserve">
+    <value>Restart required</value>
+  </data>
+  <data name="SettingsPage_Language_RestartInfo.Message" xml:space="preserve">
+    <value>Please restart the application to apply the language change.</value>
+  </data>
+  <data name="SettingsPage_Appearance.Text" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="SettingsPage_Theme.Text" xml:space="preserve">
+    <value>App Theme</value>
+  </data>
+  <data name="SettingsPage_Theme_Light.Text" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="SettingsPage_Theme_Dark.Text" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="SettingsPage_Theme_System.Text" xml:space="preserve">
+    <value>Use system setting</value>
+  </data>
+  <data name="SettingsPage_Backdrop.Text" xml:space="preserve">
+    <value>Window Backdrop</value>
+  </data>
+  <data name="SettingsPage_Backdrop_Description.Text" xml:space="preserve">
+    <value>Choose the visual effect for the window background</value>
+  </data>
+  <data name="SettingsPage_Backdrop_Mica.Text" xml:space="preserve">
+    <value>Mica</value>
+  </data>
+  <data name="SettingsPage_Backdrop_Mica_Description.Text" xml:space="preserve">
+    <value>Subtle transparency that adapts to desktop wallpaper</value>
+  </data>
+  <data name="SettingsPage_Backdrop_Acrylic.Text" xml:space="preserve">
+    <value>Acrylic</value>
+  </data>
+  <data name="SettingsPage_Backdrop_Acrylic_Description.Text" xml:space="preserve">
+    <value>Blurred transparency effect</value>
+  </data>
+  <data name="SettingsPage_Backdrop_Transparent.Text" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="SettingsPage_Backdrop_Transparent_Description.Text" xml:space="preserve">
+    <value>No transparency effect</value>
+  </data>
+  <data name="SettingsPage_IconPack.Text" xml:space="preserve">
+    <value>Icon Pack</value>
+  </data>
+  <data name="SettingsPage_IconPack_Description.Text" xml:space="preserve">
+    <value>Manage the icon pack from the GitHub repository</value>
+  </data>
+  <data name="SettingsPage_IconPack_Update.Text" xml:space="preserve">
+    <value>Check for Updates</value>
+  </data>
+  <data name="SettingsPage_About.Text" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="SettingsPage_AppName.Text" xml:space="preserve">
+    <value>Change Folder Icon</value>
+  </data>
+  <data name="SettingsPage_Version.Text" xml:space="preserve">
+    <value>Version 1.0.0</value>
+  </data>
+  <data name="SettingsPage_GitHub.Content" xml:space="preserve">
+    <value>View on GitHub</value>
+  </data>
+  <data name="IconPackStatus_Checking" xml:space="preserve">
+    <value>Checking for updates...</value>
+  </data>
+  <data name="IconPackStatus_Downloading" xml:space="preserve">
+    <value>Downloading icon pack...</value>
+  </data>
+  <data name="IconPackStatus_Extracting" xml:space="preserve">
+    <value>Extracting files...</value>
+  </data>
+  <data name="IconPackStatus_UpToDate" xml:space="preserve">
+    <value>Icon pack is up to date</value>
+  </data>
+  <data name="IconPackStatus_Updated" xml:space="preserve">
+    <value>Icon pack updated successfully</value>
+  </data>
+  <data name="IconPackStatus_Error" xml:space="preserve">
+    <value>Error updating icon pack</value>
+  </data>
+  <data name="IconPackStatus_NoInternet" xml:space="preserve">
+    <value>No internet connection</value>
   </data>
 </root>

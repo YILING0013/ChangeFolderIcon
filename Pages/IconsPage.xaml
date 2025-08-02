@@ -154,8 +154,7 @@
                                 x:Uid="IconPageApplyButton"
                                 Content="应用到文件夹"
                                 Click="ApplyButton_Click"
-                                MinWidth="120"
-                                Style="{StaticResource AccentButtonStyle}"/>
+                                MinWidth="120"/>
                         <Button x:Name="ApplyAllButton"
                                 x:Uid="IconPageApplyAllButton"
                                 Content="应用到所有子文件夹"

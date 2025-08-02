@@ -10,6 +10,13 @@
     <SplashScreenSource>E:\Visual_Studio_project\ChangeFolderIcon\Assets\icon\microsoft_windows_11.png</SplashScreenSource>
     <PackageLogoSource>E:\Visual_Studio_project\ChangeFolderIcon\Assets\icon\microsoft_windows_11.png</PackageLogoSource>
     <BadgeLogoSource>E:\Visual_Studio_project\ChangeFolderIcon\Assets\icon\microsoft_windows_11.png</BadgeLogoSource>
+    <ActiveDebugProfile>ChangeFolderIcon (Package)</ActiveDebugProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
   <ItemGroup>
     <None Update="App.xaml">

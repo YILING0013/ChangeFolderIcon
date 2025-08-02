@@ -13,6 +13,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Assets\Images\1.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Pages\SettingsPage.xaml" />
   </ItemGroup>
   <ItemGroup>

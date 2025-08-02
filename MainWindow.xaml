@@ -81,10 +81,12 @@
                                     <StackPanel Grid.Column="1" 
                                                 VerticalAlignment="Center"
                                                 x:Name="SelectFolderButtonText">
-                                        <TextBlock Text="选择根文件夹" 
+                                        <TextBlock x:Uid="SidebarButtonText_1"
+                                                   Text="选择根文件夹" 
                                                    FontWeight="SemiBold" 
                                                    FontSize="14"/>
-                                        <TextBlock Text="浏览并选择文件夹" 
+                                        <TextBlock x:Uid="SidebarButtonText_2"
+                                                   Text="浏览并选择文件夹" 
                                                    FontSize="11" 
                                                    Opacity="0.8"/>
                                     </StackPanel>
@@ -109,14 +111,14 @@
                         <FontIcon Glyph="&#xE946;"/>
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.Content>
-                        <TextBlock Text="尚未选择文件夹"/>
+                        <TextBlock x:Uid="SidebarTip" Text="尚未选择文件夹"/>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem Content="关于" Icon="ViewAll" />
-                <NavigationViewItem Content="帮助" Icon="Help" />
+                <NavigationViewItem x:Uid="About" Content="关于" Icon="ViewAll" />
+                <NavigationViewItem x:Uid="Help" Content="帮助" Icon="Help" />
             </NavigationView.FooterMenuItems>
 
             <!-- 右侧内容区域 -->

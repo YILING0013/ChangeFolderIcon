@@ -4,6 +4,7 @@ using ChangeFolderIcon.Utils.Events;
 using ChangeFolderIcon.Utils.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.ApplicationModel.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,6 +35,7 @@ namespace ChangeFolderIcon
     {
         private readonly FolderNavigationService _folderService = new();
         private readonly IconsPage _iconsPage;
+        private ResourceLoader resourceLoader = new();
 
         public MainWindow()
         {
@@ -73,7 +75,7 @@ namespace ChangeFolderIcon
             // 搜索图标
             SearchIcons(query, results);
 
-            sender.ItemsSource = results.Any() ? results : new List<SearchResult> { new SearchResult { DisplayName = "未找到结果" } };
+            sender.ItemsSource = results.Any() ? results : new List<SearchResult> { new SearchResult { DisplayName = resourceLoader.GetString("SearchboxPrompt") } };
         }
 
         // 搜索文件夹 (递归)
@@ -234,7 +236,7 @@ namespace ChangeFolderIcon
 
             var loadingItem = new NavigationViewItem
             {
-                Content = "加载中...",
+                Content = resourceLoader.GetString("LoadingTip"),
                 Icon = new FontIcon { Glyph = "\uE895" },
                 IsEnabled = false
             };
@@ -253,7 +255,7 @@ namespace ChangeFolderIcon
                 NavView.MenuItems.Clear();
                 var errorItem = new NavigationViewItem
                 {
-                    Content = "加载失败: " + ex.Message,
+                    Content = resourceLoader.GetString("LoadFailedTip") + ": " + ex.Message,
                     Icon = new FontIcon { Glyph = "\uE783" },
                     IsEnabled = false
                 };

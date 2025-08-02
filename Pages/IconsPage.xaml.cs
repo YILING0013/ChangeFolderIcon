@@ -3,6 +3,7 @@ using ChangeFolderIcon.Utils.Events;
 using ChangeFolderIcon.Utils.WindowsAPI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.UI.Xaml.Data;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace ChangeFolderIcon.Pages
         private string? _selectedFolderPath;
         private IconInfo? _selectedIcon;
         private readonly List<IconGroup>? _groupedCollection = new();
+        private ResourceLoader resourceLoader = new();
 
         // 通知 MainWindow 图标已更改的事件
         public event EventHandler<IconChangedEventArgs>? IconChanged;
@@ -141,8 +143,8 @@ namespace ChangeFolderIcon.Pages
             if (string.IsNullOrEmpty(_selectedFolderPath))
             {
                 HeaderIcon.Glyph = "\uE946";
-                HeaderTitle.Text = "请选择文件夹";
-                HeaderDescription.Text = "从左侧导航栏选择文件夹，或直接拖拽文件夹到图标上";
+                HeaderTitle.Text = resourceLoader.GetString("IconPageHeaderTitle.Text");
+                HeaderDescription.Text = resourceLoader.GetString("IconPageHeaderDescription.Text");
                 ActionPanel.Visibility = Visibility.Collapsed;
             }
             else
@@ -157,7 +159,7 @@ namespace ChangeFolderIcon.Pages
 
         private void UpdateSelectedIconText()
         {
-            SelectedIconText.Text = _selectedIcon != null ? $"已选择: {_selectedIcon.Name}" : "未选择图标";
+            SelectedIconText.Text = _selectedIcon != null ? resourceLoader.GetString("Selected") + _selectedIcon.Name : resourceLoader.GetString("IconPageSelectedIconText.Text");
         }
         #endregion
 
@@ -175,22 +177,22 @@ namespace ChangeFolderIcon.Pages
             {
                 IconManager.SetFolderIcon(_selectedFolderPath!, _selectedIcon!.FullPath);
                 IconChanged?.Invoke(this, new IconChangedEventArgs(_selectedFolderPath!, _selectedIcon.FullPath));
-                await ShowMsg("完成", "已应用到选中文件夹。");
+                await ShowMsg(resourceLoader.GetString("Done"), resourceLoader.GetString("AppliedFolder"));
             }
-            catch (Exception ex) { await ShowMsg("失败", ex.Message); }
+            catch (Exception ex) { await ShowMsg(resourceLoader.GetString("Failed"), ex.Message); }
         }
 
         private async void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(_selectedFolderPath))
-            { await ShowMsg("提示", "请在左侧导航中选择一个目标文件夹。"); return; }
+            { await ShowMsg(resourceLoader.GetString("Note"), resourceLoader.GetString("SelectTargetFolder")); return; }
             try
             {
                 IconManager.ClearFolderIcon(_selectedFolderPath!);
                 IconChanged?.Invoke(this, new IconChangedEventArgs(_selectedFolderPath!, null));
-                await ShowMsg("完成", "已清除该文件夹的图标。");
+                await ShowMsg(resourceLoader.GetString("Done"), resourceLoader.GetString("clearedFolder"));
             }
-            catch (Exception ex) { await ShowMsg("失败", ex.Message); }
+            catch (Exception ex) { await ShowMsg(resourceLoader.GetString("Failed"), ex.Message); }
         }
         #endregion
 
@@ -200,16 +202,16 @@ namespace ChangeFolderIcon.Pages
             if (!CheckPreCondition()) return;
             int count = IconManager.ApplyIconToAllSubfolders(_selectedFolderPath!, _selectedIcon!.FullPath);
             RaiseForAllSubFolders(_selectedFolderPath!, _selectedIcon!.FullPath);
-            await ShowMsg("完成", $"已为 {count} 个子文件夹应用图标。");
+            await ShowMsg(resourceLoader.GetString("Done"), resourceLoader.GetString("clearedFolderText_1") + count + resourceLoader.GetString("clearedFolderText_2"));
         }
 
         private async void ClearAllButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(_selectedFolderPath))
-            { await ShowMsg("提示", "请先选择目标文件夹。"); return; }
+            { await ShowMsg(resourceLoader.GetString("Note"), resourceLoader.GetString("SelectTargetFolderFirst")); return; }
             int count = IconManager.ClearIconRecursively(_selectedFolderPath!);
             RaiseForAllSubFolders(_selectedFolderPath!, null);
-            await ShowMsg("完成", $"已清除 {count} 个文件夹（包括子文件夹）的图标。");
+            await ShowMsg(resourceLoader.GetString("Done"), resourceLoader.GetString("clearedFoldersText_1") + count + resourceLoader.GetString("clearedFoldersText_2"));
         }
         #endregion
 
@@ -218,12 +220,12 @@ namespace ChangeFolderIcon.Pages
         {
             if (_selectedIcon == null)
             {
-                _ = ShowMsg("提示", "请先点击选择一个图标。");
+                _ = ShowMsg(resourceLoader.GetString("Note"), resourceLoader.GetString("ClickToSelect"));
                 return false;
             }
             if (string.IsNullOrEmpty(_selectedFolderPath))
             {
-                _ = ShowMsg("提示", "请先在左侧导航中选择一个文件夹。");
+                _ = ShowMsg(resourceLoader.GetString("Note"), resourceLoader.GetString("ClickToSelectLeftNavigation"));
                 return false;
             }
             return true;
@@ -234,7 +236,7 @@ namespace ChangeFolderIcon.Pages
             {
                 Title = title,
                 Content = msg,
-                CloseButtonText = "确定",
+                CloseButtonText = new ResourceLoader().GetString("CloseButtonText"),
                 XamlRoot = App.window?.Content.XamlRoot
             }.ShowAsync();
 

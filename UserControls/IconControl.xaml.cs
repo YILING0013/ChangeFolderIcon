@@ -2,6 +2,7 @@ using ChangeFolderIcon.Models;
 using ChangeFolderIcon.Utils.WindowsAPI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.UI.Xaml.Input;
 using System;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace ChangeFolderIcon.UserControls
     public sealed partial class IconControl : UserControl
     {
         private bool _isDragOver = false;
+        private ResourceLoader resourceLoader = new();
 
         public IconControl() => InitializeComponent();
 
@@ -84,7 +86,7 @@ namespace ChangeFolderIcon.UserControls
                 // 更新拖动时的提示文字
                 if (Icon != null)
                 {
-                    e.DragUIOverride.Caption = $"使用 '{Icon.Name}' 图标";
+                    e.DragUIOverride.Caption = resourceLoader.GetString("use") + Icon.Name + resourceLoader.GetString("icon");
                     e.DragUIOverride.IsCaptionVisible = true;
                     e.DragUIOverride.IsGlyphVisible = true;
                     e.DragUIOverride.IsContentVisible = true;
@@ -123,7 +125,7 @@ namespace ChangeFolderIcon.UserControls
             // 创建进度对话框
             var progressDialog = new ContentDialog
             {
-                Title = "正在应用图标",
+                Title = resourceLoader.GetString("ApplyingIcons"),
                 Content = new ProgressRing { IsActive = true },
                 XamlRoot = this.XamlRoot,
                 IsPrimaryButtonEnabled = false,
@@ -155,8 +157,8 @@ namespace ChangeFolderIcon.UserControls
             // 显示操作结果
             var resultDialog = new ContentDialog
             {
-                Title = "应用结果",
-                CloseButtonText = "确定",
+                Title = resourceLoader.GetString("Result"),
+                CloseButtonText = resourceLoader.GetString("CloseButtonText"),
                 XamlRoot = this.XamlRoot
             };
 
@@ -170,7 +172,7 @@ namespace ChangeFolderIcon.UserControls
                         new SymbolIcon { Symbol = Symbol.Accept },
                         new TextBlock
                         {
-                            Text = $"成功应用到 {ok} 个文件夹",
+                            Text = resourceLoader.GetString("SuccessfullyAppliedTip_1") + ok + resourceLoader.GetString("SuccessfullyAppliedTip_2"),
                             HorizontalAlignment = HorizontalAlignment.Center
                         }
                     }
@@ -186,7 +188,7 @@ namespace ChangeFolderIcon.UserControls
                         new SymbolIcon { Symbol = Symbol.Important },
                         new TextBlock
                         {
-                            Text = $"成功: {ok} 个\n失败: {fail} 个",
+                            Text = resourceLoader.GetString("Success") + ok + "\n" + resourceLoader.GetString("Failed") + fail,
                             HorizontalAlignment = HorizontalAlignment.Center,
                             TextAlignment = TextAlignment.Center
                         }

@@ -130,7 +130,8 @@
                         <FontIcon Glyph="&#xE896;"
                                   FontSize="24"
                                   Foreground="White"/>
-                        <TextBlock Text="释放以应用"
+                        <TextBlock x:Uid="IconControlTip"
+                                   Text="释放以应用"
                                    Foreground="White"
                                    FontSize="12"
                                    FontWeight="SemiBold"/>

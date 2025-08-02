@@ -37,10 +37,12 @@
 
                 <StackPanel Grid.Column="1" Spacing="4">
                     <TextBlock x:Name="HeaderTitle"
+                               x:Uid="IconPageHeaderTitle"
                                Text="请选择文件夹"
                                Style="{StaticResource SubtitleTextBlockStyle}"
                                FontWeight="SemiBold"/>
                     <TextBlock x:Name="HeaderDescription"
+                               x:Uid="IconPageHeaderDescription"
                                Text="从左侧导航栏选择文件夹，或直接拖拽文件夹到图标上"
                                Style="{StaticResource BodyTextBlockStyle}"
                                Opacity="0.8"
@@ -139,6 +141,7 @@
                                   FontSize="16" 
                                   VerticalAlignment="Center"/>
                         <TextBlock x:Name="SelectedIconText"
+                                   x:Uid="IconPageSelectedIconText"
                                    Text="未选择图标"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
@@ -148,19 +151,23 @@
                                Orientation="Horizontal"
                                Spacing="8">
                         <Button x:Name="ApplyButton"
+                                x:Uid="IconPageApplyButton"
                                 Content="应用到文件夹"
                                 Click="ApplyButton_Click"
                                 MinWidth="120"
                                 Style="{StaticResource AccentButtonStyle}"/>
                         <Button x:Name="ApplyAllButton"
+                                x:Uid="IconPageApplyAllButton"
                                 Content="应用到所有子文件夹"
                                 Click="ApplyAllButton_Click"
                                 MinWidth="140"/>
                         <Button x:Name="ClearButton"
+                                x:Uid="IconPageClearButton"
                                 Content="重置图标"
                                 Click="ClearButton_Click"
                                 MinWidth="100"/>
                         <Button x:Name="ClearAllButton"
+                                x:Uid="IconPageClearAllButton"
                                 Content="重置所有"
                                 Click="ClearAllButton_Click"
                                 MinWidth="100"/>

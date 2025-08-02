@@ -41,7 +41,7 @@
             <AutoSuggestBox x:Name="TitleBarSearchBox"
                             x:Uid="itleBarSearchBox"
                             QueryIcon="Find"
-                            PlaceholderText="搜索图标或文件夹"
+                            PlaceholderText="搜索框提示词"
                             VerticalAlignment="Center"
                             Margin="0,4,0,0"
                             TextMemberPath="DisplayName">

@@ -117,13 +117,130 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="About.Content" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="ApplyingIcons" xml:space="preserve">
+    <value>Applying icons</value>
+  </data>
+  <data name="Help.Content" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="icon" xml:space="preserve">
+    <value>icon</value>
+  </data>
   <data name="itleBarSearchBox.PlaceholderText" xml:space="preserve">
-    <value>Search for icons</value>
+    <value>Search for icons or folders.</value>
+  </data>
+  <data name="LoadFailedTip" xml:space="preserve">
+    <value>Load Failed</value>
+  </data>
+  <data name="LoadingTip" xml:space="preserve">
+    <value>Loding...</value>
+  </data>
+  <data name="CloseButtonText" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Result" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="SearchboxPrompt" xml:space="preserve">
+    <value>No results found.</value>
   </data>
   <data name="SettingsButton.ToolTipService.ToolTip" xml:space="preserve">
     <value>Setting</value>
   </data>
+  <data name="SidebarButtonText_1.Text" xml:space="preserve">
+    <value>Select the root folder.</value>
+  </data>
+  <data name="SidebarButtonText_2.Text" xml:space="preserve">
+    <value>Browse and select the folder.</value>
+  </data>
+  <data name="SidebarTip.Text" xml:space="preserve">
+    <value>Folder has not been selected yet.</value>
+  </data>
+  <data name="SuccessfullyAppliedTip_1" xml:space="preserve">
+    <value>Successfully applied to </value>
+  </data>
+  <data name="SuccessfullyAppliedTip_2" xml:space="preserve">
+    <value>folders</value>
+  </data>
   <data name="TitleBarTitleText.Text" xml:space="preserve">
     <value>Folder-Icon-Change</value>
+  </data>
+  <data name="use" xml:space="preserve">
+    <value>use</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="IconPageHeaderTitle.Text" xml:space="preserve">
+    <value>Please select a folder</value>
+  </data>
+  <data name="IconPageHeaderDescription.Text" xml:space="preserve">
+    <value>Select a folder from the left navigation bar, or drag and drop a folder onto the icon</value>
+  </data>
+  <data name="IconPageSelectedIconText.Text" xml:space="preserve">
+    <value>No icon selected.</value>
+  </data>
+  <data name="IconPageApplyButton.Content" xml:space="preserve">
+    <value>Apply to folder</value>
+  </data>
+  <data name="IconPageApplyAllButton.Content" xml:space="preserve">
+    <value>Apply to all subfolders</value>
+  </data>
+  <data name="IconPageClearButton.Content" xml:space="preserve">
+    <value>Reset icon</value>
+  </data>
+  <data name="IconPageClearAllButton.Content" xml:space="preserve">
+    <value>Reset all</value>
+  </data>
+  <data name="Selected" xml:space="preserve">
+    <value>Selected</value>
+  </data>
+  <data name="NoIconSelected" xml:space="preserve">
+    <value>No icon selected</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="AppliedFolder" xml:space="preserve">
+    <value>Applied to the selected folder(s).</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="SelectTargetFolder" xml:space="preserve">
+    <value>Please select a target folder from the left navigation.</value>
+  </data>
+  <data name="clearedFolder" xml:space="preserve">
+    <value>The folder's icon has been cleared.</value>
+  </data>
+  <data name="clearedFolderText_1" xml:space="preserve">
+    <value>Icons applied to </value>
+  </data>
+  <data name="clearedFolderText_2" xml:space="preserve">
+    <value> subfolders.</value>
+  </data>
+  <data name="SelectTargetFolderFirst" xml:space="preserve">
+    <value>Please select a target folder first.</value>
+  </data>
+  <data name="clearedFoldersText_1" xml:space="preserve">
+    <value>Icons cleared for </value>
+  </data>
+  <data name="clearedFoldersText_2" xml:space="preserve">
+    <value> folders (including subfolders).</value>
+  </data>
+  <data name="ClickToSelect" xml:space="preserve">
+    <value>Please click to select an icon first.</value>
+  </data>
+  <data name="ClickToSelectLeftNavigation" xml:space="preserve">
+    <value>Please select a folder from the left navigation first.</value>
+  </data>
+  <data name="IconControlTip.Text" xml:space="preserve">
+    <value>Release to apply</value>
   </data>
 </root>

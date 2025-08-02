@@ -37,5 +37,11 @@
 本项目采用 [GNU 许可证](LICENSE) 开源。
 
 ---
+
+### 致谢
+
+本项目部分图标资源来源于 [Folder-Ico](https://github.com/icon11-community/Folder-Ico)，特此感谢该项目的贡献者。  
+
+---  
+
 ⭐ 如果这个项目对您有帮助，请给我一个 Star！🚀
----

@@ -37,4 +37,10 @@
 This project is open-source under the [GNU License](LICENSE).  
 
 ---  
+### Acknowledgments
+
+Special thanks to the contributors of [Folder-Ico](https://github.com/icon11-community/Folder-Ico) for providing some of the icon resources used in this project.  
+
+---
+
 ⭐ If you find this project useful, please give it a **Star**! 🚀

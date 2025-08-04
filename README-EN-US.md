@@ -35,7 +35,7 @@
 
 ## License  
 
-This project is open-source under the [GNU License](LICENSE).  
+This project is open-source under the [GPL-3.0 license](LICENSE).  
 
 ---  
 ### Acknowledgments

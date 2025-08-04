@@ -35,7 +35,7 @@
 
 ## 许可证
 
-本项目采用 [GNU 许可证](LICENSE) 开源。
+本项目开源许可采用 [GPL-3.0 license](LICENSE)。
 
 ---
 

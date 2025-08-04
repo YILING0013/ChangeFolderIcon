@@ -32,38 +32,48 @@
                 </Grid>
 
                 <!-- Settings Content -->
-                <StackPanel Grid.Row="1" Spacing="24">
+                <StackPanel Grid.Row="1" Spacing="16">
+
+                    <!-- Appearance & behavior section header -->
+                    <TextBlock x:Uid="SettingsPage_Appearance_and_behavior"
+                               Text="Appearance &amp; behavior" 
+                               Style="{ThemeResource BodyStrongTextBlockStyle}"
+                               Margin="0,16,0,8"/>
+
                     <!-- Language Settings Card -->
                     <Border CornerRadius="8" 
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            Padding="24,20">
-                        <StackPanel Spacing="16">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <FontIcon Glyph="&#xE775;" 
-                                          FontSize="20" 
-                                          Margin="0,0,12,0"
-                                          VerticalAlignment="Center"/>
-                                <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock x:Uid="SettingsPage_Language" 
-                                               Text="Language" 
-                                               Style="{ThemeResource SubtitleTextBlockStyle}"
-                                               FontWeight="SemiBold"/>
-                                    <TextBlock x:Uid="SettingsPage_Language_Description" 
-                                               Text="Choose the display language for the application"
-                                               Style="{ThemeResource CaptionTextBlockStyle}"
-                                               Opacity="0.8"
-                                               TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </Grid>
-                            <ComboBox x:Name="LanguageComboBox" 
-                                      Width="280" 
-                                      HorizontalAlignment="Left"
+                            Padding="20,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <FontIcon Grid.Column="0"
+                                      Glyph="&#xE775;" 
+                                      FontSize="20" 
+                                      Margin="0,0,16,0"
+                                      VerticalAlignment="Center"/>
+
+                            <StackPanel Grid.Column="1" 
+                                        VerticalAlignment="Center"
+                                        Spacing="4">
+                                <TextBlock x:Uid="SettingsPage_Language" 
+                                           Text="Language" 
+                                           Style="{ThemeResource BodyTextBlockStyle}"/>
+                                <TextBlock x:Uid="SettingsPage_Language_Description" 
+                                           Text="Choose the display language for the application"
+                                           Style="{ThemeResource CaptionTextBlockStyle}"
+                                           Opacity="0.6"/>
+                            </StackPanel>
+
+                            <ComboBox Grid.Column="2"
+                                      x:Name="LanguageComboBox" 
+                                      Width="200"
                                       SelectionChanged="LanguageComboBox_SelectionChanged">
                                 <ComboBoxItem Tag="en-US">
                                     <TextBlock x:Uid="SettingsPage_Language_English" Text="English"/>
@@ -72,214 +82,265 @@
                                     <TextBlock x:Uid="SettingsPage_Language_Chinese" Text="简体中文"/>
                                 </ComboBoxItem>
                             </ComboBox>
-                            <InfoBar x:Uid="SettingsPage_Language_RestartInfo"
-                                     IsOpen="False"
-                                     x:Name="LanguageRestartInfoBar"
-                                     Severity="Informational"
-                                     Title="Restart required"
-                                     Message="Please restart the application to apply the language change."
-                                     IsClosable="True"/>
-                        </StackPanel>
+                        </Grid>
                     </Border>
 
-                    <!-- Appearance Settings Card -->
+                    <!-- Language Restart Info -->
+                    <InfoBar x:Uid="SettingsPage_Language_RestartInfo"
+                             IsOpen="False"
+                             x:Name="LanguageRestartInfoBar"
+                             Severity="Informational"
+                             Title="Restart required"
+                             Message="Please restart the application to apply the language change."
+                             IsClosable="True"
+                             Margin="0,0,0,8"/>
+
+                    <!-- App Theme Card -->
                     <Border CornerRadius="8" 
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            Padding="24,20">
-                        <StackPanel Spacing="24">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <FontIcon Glyph="&#xE790;" 
-                                          FontSize="20" 
-                                          Margin="0,0,12,0"
-                                          VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="1"
-                                           x:Uid="SettingsPage_Appearance" 
-                                           Text="Appearance" 
-                                           Style="{ThemeResource SubtitleTextBlockStyle}"
-                                           FontWeight="SemiBold"/>
-                            </Grid>
+                            Padding="20,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                            <!-- Theme Selection -->
-                            <StackPanel Spacing="12">
+                            <FontIcon Grid.Column="0"
+                                      Glyph="&#xE790;" 
+                                      FontSize="20" 
+                                      Margin="0,0,16,0"
+                                      VerticalAlignment="Center"/>
+
+                            <StackPanel Grid.Column="1" 
+                                        VerticalAlignment="Center"
+                                        Spacing="4">
                                 <TextBlock x:Uid="SettingsPage_Theme" 
-                                           Text="App Theme" 
-                                           Style="{ThemeResource BodyStrongTextBlockStyle}"/>
-                                <RadioButtons x:Name="ThemeRadioButtons" 
-                                              SelectionChanged="ThemeRadioButtons_SelectionChanged">
-                                    <RadioButton Tag="Light">
-                                        <StackPanel Orientation="Horizontal" Spacing="12">
-                                            <FontIcon Glyph="&#xE706;" FontSize="16"/>
-                                            <TextBlock x:Uid="SettingsPage_Theme_Light" Text="Light"/>
-                                        </StackPanel>
-                                    </RadioButton>
-                                    <RadioButton Tag="Dark">
-                                        <StackPanel Orientation="Horizontal" Spacing="12">
-                                            <FontIcon Glyph="&#xE708;" FontSize="16"/>
-                                            <TextBlock x:Uid="SettingsPage_Theme_Dark" Text="Dark"/>
-                                        </StackPanel>
-                                    </RadioButton>
-                                    <RadioButton Tag="Default">
-                                        <StackPanel Orientation="Horizontal" Spacing="12">
-                                            <FontIcon Glyph="&#xE770;" FontSize="16"/>
-                                            <TextBlock x:Uid="SettingsPage_Theme_System" Text="Use system setting"/>
-                                        </StackPanel>
-                                    </RadioButton>
-                                </RadioButtons>
+                                           Text="App theme" 
+                                           Style="{ThemeResource BodyTextBlockStyle}"/>
+                                <TextBlock Text="Select which app theme to display"
+                                           Style="{ThemeResource CaptionTextBlockStyle}"
+                                           Opacity="0.6"/>
                             </StackPanel>
 
-                            <Rectangle Height="1" 
-                                       Fill="{ThemeResource DividerStrokeColorDefaultBrush}"
-                                       Margin="-24,0"/>
-
-                            <!-- Backdrop Selection -->
-                            <StackPanel Spacing="12">
-                                <StackPanel Spacing="4">
-                                    <TextBlock x:Uid="SettingsPage_Backdrop" 
-                                               Text="Window Backdrop" 
-                                               Style="{ThemeResource BodyStrongTextBlockStyle}"/>
-                                    <TextBlock x:Uid="SettingsPage_Backdrop_Description"
-                                               Text="Choose the visual effect for the window background"
-                                               Style="{ThemeResource CaptionTextBlockStyle}"
-                                               Opacity="0.8"/>
-                                </StackPanel>
-                                <RadioButtons x:Name="BackdropRadioButtons" 
-                                              SelectionChanged="BackdropRadioButtons_SelectionChanged">
-                                    <RadioButton Tag="Mica">
-                                        <StackPanel Spacing="4">
-                                            <TextBlock x:Uid="SettingsPage_Backdrop_Mica" Text="Mica"/>
-                                            <TextBlock x:Uid="SettingsPage_Backdrop_Mica_Description" 
-                                                       Text="Subtle transparency that adapts to desktop wallpaper"
-                                                       Style="{ThemeResource CaptionTextBlockStyle}"
-                                                       Opacity="0.6"/>
-                                        </StackPanel>
-                                    </RadioButton>
-                                    <RadioButton Tag="Acrylic">
-                                        <StackPanel Spacing="4">
-                                            <TextBlock x:Uid="SettingsPage_Backdrop_Acrylic" Text="Acrylic"/>
-                                            <TextBlock x:Uid="SettingsPage_Backdrop_Acrylic_Description" 
-                                                       Text="Blurred transparency effect"
-                                                       Style="{ThemeResource CaptionTextBlockStyle}"
-                                                       Opacity="0.6"/>
-                                        </StackPanel>
-                                    </RadioButton>
-                                    <RadioButton Tag="Transparent">
-                                        <StackPanel Spacing="4">
-                                            <TextBlock x:Uid="SettingsPage_Backdrop_Transparent" Text="None"/>
-                                            <TextBlock x:Uid="SettingsPage_Backdrop_Transparent_Description" 
-                                                       Text="No transparency effect"
-                                                       Style="{ThemeResource CaptionTextBlockStyle}"
-                                                       Opacity="0.6"/>
-                                        </StackPanel>
-                                    </RadioButton>
-                                </RadioButtons>
-                            </StackPanel>
-                        </StackPanel>
+                            <ComboBox Grid.Column="2"
+                                      x:Name="ThemeComboBox" 
+                                      Width="200"
+                                      SelectionChanged="ThemeComboBox_SelectionChanged">
+                                <ComboBoxItem Tag="Light">
+                                    <TextBlock x:Uid="SettingsPage_Theme_Light" Text="Light"/>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="Dark">
+                                    <TextBlock x:Uid="SettingsPage_Theme_Dark" Text="Dark"/>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="Default">
+                                    <TextBlock x:Uid="SettingsPage_Theme_System" Text="Use system setting"/>
+                                </ComboBoxItem>
+                            </ComboBox>
+                        </Grid>
                     </Border>
 
-                    <!-- Icon Pack Settings Card -->
+                    <!-- Window Backdrop Card -->
                     <Border CornerRadius="8" 
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            Padding="24,20">
-                        <StackPanel Spacing="16">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <FontIcon Glyph="&#xE8F1;" 
-                                          FontSize="20" 
-                                          Margin="0,0,12,0"
-                                          VerticalAlignment="Center"/>
-                                <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock x:Uid="SettingsPage_IconPack" 
-                                               Text="Icon Pack" 
-                                               Style="{ThemeResource SubtitleTextBlockStyle}"
-                                               FontWeight="SemiBold"/>
-                                    <TextBlock x:Uid="SettingsPage_IconPack_Description" 
-                                               Text="Manage the icon pack from the GitHub repository"
-                                               Style="{ThemeResource CaptionTextBlockStyle}"
-                                               Opacity="0.8"
-                                               TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </Grid>
+                            Padding="20,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                            <Grid ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <FontIcon Grid.Column="0"
+                                      Glyph="&#xE91B;" 
+                                      FontSize="20" 
+                                      Margin="0,0,16,0"
+                                      VerticalAlignment="Center"/>
 
+                            <StackPanel Grid.Column="1" 
+                                        VerticalAlignment="Center"
+                                        Spacing="4">
+                                <TextBlock x:Uid="SettingsPage_Backdrop" 
+                                           Text="Navigation style" 
+                                           Style="{ThemeResource BodyTextBlockStyle}"/>
+                                <TextBlock x:Uid="SettingsPage_Backdrop_Description"
+                                           Text="Choose the visual effect for the window background"
+                                           Style="{ThemeResource CaptionTextBlockStyle}"
+                                           Opacity="0.6"/>
+                            </StackPanel>
+
+                            <ComboBox Grid.Column="2"
+                                      x:Name="BackdropComboBox" 
+                                      Width="200"
+                                      SelectionChanged="BackdropComboBox_SelectionChanged">
+                                <ComboBoxItem Tag="Mica">
+                                    <TextBlock x:Uid="SettingsPage_Backdrop_Mica" Text="Mica"/>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="Acrylic">
+                                    <TextBlock x:Uid="SettingsPage_Backdrop_Acrylic" Text="Acrylic"/>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="Transparent">
+                                    <TextBlock x:Uid="SettingsPage_Backdrop_Transparent" Text="None"/>
+                                </ComboBoxItem>
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- Icon Pack Update Card -->
+                    <Border CornerRadius="8" 
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            Padding="20,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <FontIcon Grid.Column="0"
+                                      Glyph="&#xE8F1;" 
+                                      FontSize="20" 
+                                      Margin="0,0,16,0"
+                                      VerticalAlignment="Center"/>
+
+                            <StackPanel Grid.Column="1" 
+                                        VerticalAlignment="Center"
+                                        Spacing="4">
+                                <TextBlock x:Uid="SettingsPage_IconPack" 
+                                           Text="Icon Pack Updates" 
+                                           Style="{ThemeResource BodyTextBlockStyle}"/>
+                                <TextBlock x:Uid="SettingsPage_IconPack_Description" 
+                                           Text="Check for updates from the GitHub repository"
+                                           Style="{ThemeResource CaptionTextBlockStyle}"
+                                           Opacity="0.6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" 
+                                        Orientation="Horizontal" 
+                                        Spacing="12"
+                                        VerticalAlignment="Center">
+                                <ProgressRing x:Name="UpdateProgressRing" 
+                                              IsIndeterminate="True" 
+                                              Visibility="Collapsed" 
+                                              Width="20" 
+                                              Height="20"/>
                                 <Button x:Name="UpdateIconsButton" 
-                                        Grid.Column="0"
+                                        x:Uid="SettingsPage_UpdateIconsButton"
                                         Click="UpdateIconsButton_Click"
-                                        Style="{ThemeResource AccentButtonStyle}">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon Glyph="&#xE777;" FontSize="16"/>
-                                        <TextBlock x:Uid="SettingsPage_IconPack_Update" Text="Check for Updates"/>
-                                    </StackPanel>
-                                </Button>
-
-                                <StackPanel Grid.Column="1" 
-                                            VerticalAlignment="Center"
-                                            Spacing="4">
-                                    <ProgressRing x:Name="UpdateProgressRing" 
-                                                  IsIndeterminate="True" 
-                                                  Visibility="Collapsed" 
-                                                  Width="20" 
-                                                  Height="20" 
-                                                  HorizontalAlignment="Left"/>
-                                    <TextBlock x:Name="IconPackStatusTextBlock" 
-                                               Style="{ThemeResource CaptionTextBlockStyle}"
-                                               TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </Grid>
-                        </StackPanel>
+                                        Content="Check for Updates"/>
+                            </StackPanel>
+                        </Grid>
                     </Border>
 
-                    <!-- About Section -->
+                    <!-- Icon Pack Folder Selection Card -->
                     <Border CornerRadius="8" 
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
-                            Padding="24,20">
-                        <StackPanel Spacing="16">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <FontIcon Glyph="&#xE946;" 
-                                          FontSize="20" 
-                                          Margin="0,0,12,0"
-                                          VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="1"
-                                           x:Uid="SettingsPage_About" 
-                                           Text="About" 
-                                           Style="{ThemeResource SubtitleTextBlockStyle}"
-                                           FontWeight="SemiBold"/>
-                            </Grid>
+                            Padding="20,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                            <StackPanel Spacing="8">
+                            <FontIcon Grid.Column="0"
+                                      Glyph="&#xE8B7;" 
+                                      FontSize="20" 
+                                      Margin="0,0,16,0"
+                                      VerticalAlignment="Center"/>
+
+                            <StackPanel Grid.Column="1" 
+                                        VerticalAlignment="Center"
+                                        Spacing="4">
+                                <TextBlock x:Uid="SettingsPage_IconPack_Folder"
+                                           Text="Icon Pack Folder" 
+                                           Style="{ThemeResource BodyTextBlockStyle}"/>
+                                <TextBlock x:Name="IconPackPathTextBlock"
+                                           TextWrapping="Wrap"
+                                           Style="{ThemeResource CaptionTextBlockStyle}"
+                                           Opacity="0.6"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="2"
+                                    x:Name="SelectIconsFolderButton"
+                                    Click="SelectIconsFolderButton_Click"
+                                    x:Uid="SettingsPage_IconPack_SelectFolder"
+                                    Content="手动选择图标包路径"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Status Display -->
+                    <TextBlock x:Name="IconPackStatusTextBlock"
+                               TextWrapping="Wrap"
+                               Style="{ThemeResource CaptionTextBlockStyle}"
+                               Opacity="0.8"
+                               Margin="0,0,0,16"/>
+
+                    <!-- About section header -->
+                    <TextBlock Text="About" 
+                               Style="{ThemeResource BodyStrongTextBlockStyle}"
+                               Margin="0,16,0,8"/>
+
+                    <!-- About Card -->
+                    <Border CornerRadius="8" 
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            Padding="20,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    CornerRadius="8"
+                                    Width="40"
+                                    Height="40"
+                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                    Margin="0,0,16,0"
+                                    VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE946;" 
+                                          FontSize="20"
+                                          Foreground="White"/>
+                            </Border>
+
+                            <StackPanel Grid.Column="1" 
+                                        VerticalAlignment="Center"
+                                        Spacing="4">
                                 <TextBlock x:Uid="SettingsPage_AppName" 
                                            Text="Change Folder Icon"
                                            Style="{ThemeResource BodyStrongTextBlockStyle}"/>
-                                <TextBlock x:Uid="SettingsPage_Version" 
-                                           Text="Version 1.0.0"
+                                <TextBlock Text="© 2025 Microsoft. All rights reserved."
                                            Style="{ThemeResource CaptionTextBlockStyle}"
-                                           Opacity="0.8"/>
-                                <HyperlinkButton x:Uid="SettingsPage_GitHub"
-                                                 Content="View on GitHub"
-                                                 NavigateUri="https://github.com/YILING0013/ChangeFolderIcon"/>
+                                           Opacity="0.6"/>
                             </StackPanel>
-                        </StackPanel>
+
+                            <StackPanel Grid.Column="2" 
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Right">
+                                <TextBlock x:Uid="SettingsPage_Version" 
+                                           Text="1.0.0.0"
+                                           Style="{ThemeResource CaptionTextBlockStyle}"
+                                           HorizontalAlignment="Right"
+                                           Opacity="0.8"/>
+                                <TextBlock HorizontalAlignment="Right"
+                                           Margin="0,4,0,0">
+                                    <Hyperlink NavigateUri="https://github.com/YILING0013/ChangeFolderIcon">
+                                        <Run x:Uid="SettingsPage_GitHub" Text="View on GitHub"/>
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </StackPanel>
             </Grid>

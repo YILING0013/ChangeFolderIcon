@@ -14,6 +14,9 @@ namespace ChangeFolderIcon.Utils.Services
         private readonly string? _localPath;
         public event Action<string>? StatusUpdated;
 
+        // 新增: 公共属性，用于暴露本地路径
+        public string? IconPackDirectory => _localPath;
+
         public IconPackService(string repoUrl, string localPath)
         {
             _repoUrl = repoUrl;
@@ -26,6 +29,12 @@ namespace ChangeFolderIcon.Utils.Services
             {
                 try
                 {
+                    if (string.IsNullOrEmpty(_localPath) || string.IsNullOrEmpty(_repoUrl))
+                    {
+                        StatusUpdated?.Invoke("Repository URL or local path is not configured.");
+                        return false;
+                    }
+
                     // 如果目标目录存在但不是一个有效的Git仓库，则先清理
                     if (Directory.Exists(_localPath) && !Repository.IsValid(_localPath))
                     {

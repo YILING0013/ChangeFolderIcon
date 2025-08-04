@@ -402,10 +402,10 @@
     <comment>应用程序名称</comment>
   </data>
   <data name="SettingsPage_Version.Text" xml:space="preserve">
-    <value>版本 1.0.0</value>
-    <comment>Version 1.0.0</comment>
+    <value>版本 1.0.1</value>
+    <comment>Version 1.0.1</comment>
   </data>
-  <data name="SettingsPage_GitHub.Content" xml:space="preserve">
+  <data name="SettingsPage_GitHub.Text" xml:space="preserve">
     <value>在 GitHub 上查看</value>
     <comment>GitHub链接文本</comment>
   </data>
@@ -436,5 +436,41 @@
   <data name="IconPackStatus_NoInternet" xml:space="preserve">
     <value>无网络连接</value>
     <comment>无网络连接状态</comment>
+  </data>
+  <data name="IconPackMissingContent.Text" xml:space="preserve">
+    <value>无法加载图标包。请在设置中更新或手动选择文件夹。</value>
+    <comment>缺失图标包提示文本</comment>
+  </data>
+  <data name="IconPackMissingTitle.Text" xml:space="preserve">
+    <value>未找到图标包</value>
+    <comment>缺失图标提示标题</comment>
+  </data>
+  <data name="GoToSettings.Content" xml:space="preserve">
+    <value>前往设置</value>
+    <comment>前往设置按钮文本</comment>
+  </data>
+  <data name="SettingsPage_IconPack_SelectFolder.Content" xml:space="preserve">
+    <value>手动选择图标包路径</value>
+    <comment>手动设置按钮文本</comment>
+  </data>
+  <data name="NotSet" xml:space="preserve">
+    <value>未设置</value>
+    <comment>未设置</comment>
+  </data>
+  <data name="CurrentPath" xml:space="preserve">
+    <value>当前路径</value>
+    <comment>当前路径</comment>
+  </data>
+  <data name="SettingsPage_IconPack_Folder.Text" xml:space="preserve">
+    <value>图标包文件夹路径</value>
+    <comment>图标包文件夹路径</comment>
+  </data>
+  <data name="SettingsPage_UpdateIconsButton.Content" xml:space="preserve">
+    <value>检查更新</value>
+    <comment>检查更新按钮文本</comment>
+  </data>
+  <data name="SettingsPage_Appearance_and_behavior.Text" xml:space="preserve">
+    <value>外观与行为</value>
+    <comment>外观与行为分类</comment>
   </data>
 </root>

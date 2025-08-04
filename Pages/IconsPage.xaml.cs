@@ -24,20 +24,52 @@ namespace ChangeFolderIcon.Pages
         private string? _selectedFolderPath;
         private IconInfo? _selectedIcon;
         private readonly List<IconGroup>? _groupedCollection = new();
-        private ResourceLoader resourceLoader = new();
+        private readonly ResourceLoader resourceLoader = new();
         private readonly SettingsService? _settingsService;
 
         // 通知 MainWindow 图标已更改的事件
         public event EventHandler<IconChangedEventArgs>? IconChanged;
+        // 请求 MainWindow 导航到设置页面的事件
+        public event EventHandler? RequestNavigateToSettings;
 
         public IconsPage()
         {
             this.InitializeComponent();
             _settingsService = App.SettingsService;
-            LoadIconsFromAssets();
-            SetupGrouping();
-            SetupAlphabetIndex();
-            UpdateHeaderAndActions();
+            InitializeIcons();
+        }
+
+        /// <summary>
+        /// 初始化图标库，如果找不到则显示提示信息
+        /// </summary>
+        public void InitializeIcons()
+        {
+            string? icoDir = _settingsService?.Settings?.IconPackPath;
+            if (icoDir != null && Directory.Exists(icoDir) && Directory.EnumerateFiles(icoDir, "*.ico").Any())
+            {
+                // 找到图标，正常加载
+                MissingIconsOverlay.Visibility = Visibility.Collapsed;
+                IconsGrid.Visibility = Visibility.Visible;
+                AlphabetIndexBorder.Visibility = Visibility.Visible;
+
+                Icons.Clear();
+                foreach (string ico in Directory.EnumerateFiles(icoDir, "*.ico"))
+                {
+                    try { Icons.Add(IconInfo.FromPath(ico)); }
+                    catch { /* ignore */ }
+                }
+
+                SetupGrouping();
+                SetupAlphabetIndex();
+                UpdateHeaderAndActions();
+            }
+            else
+            {
+                // 未找到图标，显示覆盖层提示
+                MissingIconsOverlay.Visibility = Visibility.Visible;
+                IconsGrid.Visibility = Visibility.Collapsed;
+                AlphabetIndexBorder.Visibility = Visibility.Collapsed;
+            }
         }
 
         // 公共方法，用于从外部（如MainWindow）滚动到指定图标
@@ -52,18 +84,6 @@ namespace ChangeFolderIcon.Pages
             IconsGrid.SelectedItem = targetIcon;
             _selectedIcon = targetIcon;
             UpdateSelectedIconText();
-        }
-
-        private void LoadIconsFromAssets()
-        {
-            if (_settingsService?.Settings?.IconPackPath is string icoDir && Directory.Exists(icoDir))
-            {
-                foreach (string ico in Directory.EnumerateFiles(icoDir, "*.ico"))
-                {
-                    try { Icons.Add(IconInfo.FromPath(ico)); }
-                    catch { /* ignore */ }
-                }
-            }
         }
 
         private void SetupGrouping()
@@ -100,6 +120,9 @@ namespace ChangeFolderIcon.Pages
 
         private void SetupAlphabetIndex()
         {
+            // 清理旧的按钮以防重复添加
+            AlphabetIndexPanel.Children.Clear();
+
             // 创建索引按钮
             var indexChars = new List<string> { "0-9" };
             indexChars.AddRange(Enumerable.Range('A', 26).Select(i => ((char)i).ToString()));
@@ -169,6 +192,11 @@ namespace ChangeFolderIcon.Pages
         {
             _selectedIcon = e.ClickedItem as IconInfo;
             UpdateSelectedIconText();
+        }
+
+        private void GoToSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            RequestNavigateToSettings?.Invoke(this, EventArgs.Empty);
         }
 
         #region "单文件夹"按钮操作

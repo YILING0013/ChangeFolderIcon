@@ -29,7 +29,8 @@
 
 ### Notes  
 - Requires **Windows 10 or later**.  
-- On first launch, go to **Settings** and wait for icon resources to load, then restart the app.  
+- On first launch, go to **Settings** and wait for icon resources to load, then check for updates.
+- if you encounter issues fetching icon resources, check your network connection or manually download the icon resource package and select it in the settings page.  
 - To change the language, select a language in **Settings** and restart the app.  
 
 ## License  

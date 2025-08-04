@@ -13,7 +13,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Content Remove="Assets\Images\1.png" />
+    <Content Remove="Assets\Images\1_en-us.png" />
+    <Content Remove="Assets\Images\1_zh-cn.png" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Pages\SettingsPage.xaml" />

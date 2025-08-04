@@ -34,21 +34,23 @@ namespace ChangeFolderIcon
 
     public sealed partial class MainWindow : Window
     {
-        private readonly FolderNavigationService _folderService = new();
-        private readonly IconsPage _iconsPage;
-        private ResourceLoader resourceLoader = new();
+        private readonly FolderNavigationService? _folderService = new();
+        private IconsPage? _iconsPage; // 改为可替换的字段
         private readonly SettingsPage? _settingsPage;
+        private readonly ResourceLoader? resourceLoader = new();
 
         public MainWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
-            _iconsPage = new IconsPage();
+            // 初始化设置页面并订阅其事件
             _settingsPage = new SettingsPage();
-            _iconsPage.IconChanged += IconsPage_IconChanged;
-            ContentFrame.Content = _iconsPage;
-            _iconsPage.UpdateState(null);
+            _settingsPage.IconPackPathChanged += OnIconPackPathChanged;
 
+            // 创建初始的图标页面
+            CreateAndNavigateToIconsPage();
+
+            // 设置窗口的其余部分
             NavView.PaneOpening += NavView_PaneStateChanged;
             NavView.PaneClosing += NavView_PaneStateChanged;
             UpdatePaneVisibility(NavView.IsPaneOpen);
@@ -60,6 +62,65 @@ namespace ChangeFolderIcon
 
             CustomTitleBarControl.SettingsClicked += OnSettingsClicked;
         }
+
+        /// <summary>
+        /// 创建或重新创建IconsPage，并处理事件订阅
+        /// </summary>
+        private void CreateAndNavigateToIconsPage()
+        {
+            // 如果存在旧实例，则取消订阅其事件
+            if (_iconsPage != null)
+            {
+                _iconsPage.IconChanged -= IconsPage_IconChanged;
+                _iconsPage.RequestNavigateToSettings -= OnRequestNavigateToSettings;
+            }
+
+            // 在页面重建期间解绑SelectionChanged事件
+            NavView.SelectionChanged -= NavView_SelectionChanged;
+
+            _iconsPage = new IconsPage();
+            _iconsPage.IconChanged += IconsPage_IconChanged;
+            _iconsPage.RequestNavigateToSettings += OnRequestNavigateToSettings;
+            ContentFrame.Content = _iconsPage;
+
+            string? path = (NavView.SelectedItem as NavigationViewItem)?.Tag as string;
+            _iconsPage.UpdateState(path);
+
+            // 重绑定SelectionChanged
+            NavView.SelectionChanged += NavView_SelectionChanged;
+            NavView.IsPaneVisible = true;
+        }
+
+        /// <summary>
+        /// 当图标包在设置中更新时触发
+        /// </summary>
+        private void OnIconPackPathChanged(object? sender, EventArgs e)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                // 重新创建图标页面以加载新图标
+                CreateAndNavigateToIconsPage();
+
+                // 如果当前在设置页面，则自动导航回新的图标页面
+                if (ContentFrame.Content is SettingsPage)
+                {
+                    ContentFrame.Content = _iconsPage;
+                }
+            });
+        }
+
+        /// <summary>
+        /// 当图标页面请求导航到设置时触发
+        /// </summary>
+        private void OnRequestNavigateToSettings(object? sender, EventArgs e)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                ContentFrame.Content = _settingsPage;
+                NavView.IsPaneVisible = false;
+            });
+        }
+
 
         #region 搜索逻辑
         // 当用户在搜索框中输入文本时
@@ -80,7 +141,7 @@ namespace ChangeFolderIcon
             // 搜索图标
             SearchIcons(query, results);
 
-            sender.ItemsSource = results.Any() ? results : new List<SearchResult> { new SearchResult { DisplayName = resourceLoader.GetString("SearchboxPrompt") } };
+            sender.ItemsSource = results.Any() ? results : new List<SearchResult> { new SearchResult { DisplayName = resourceLoader?.GetString("SearchboxPrompt") } };
         }
 
         // 搜索文件夹 (递归)
@@ -111,9 +172,10 @@ namespace ChangeFolderIcon
         // 搜索图标
         private void SearchIcons(string query, List<SearchResult> results)
         {
-            var matchingIcons = _iconsPage.Icons
+            var matchingIcons = _iconsPage?.Icons
                 .Where(icon => icon.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
 
+            if (matchingIcons == null || !matchingIcons.Any()) return;
             foreach (var icon in matchingIcons)
             {
                 results.Add(new SearchResult
@@ -168,7 +230,7 @@ namespace ChangeFolderIcon
                     {
                         ContentFrame.Content = _iconsPage;
                     }
-                    _iconsPage.ScrollToIcon(result.OriginalItem as IconInfo);
+                    _iconsPage?.ScrollToIcon(result.OriginalItem as IconInfo);
                     break;
             }
         }
@@ -241,7 +303,7 @@ namespace ChangeFolderIcon
 
             var loadingItem = new NavigationViewItem
             {
-                Content = resourceLoader.GetString("LoadingTip"),
+                Content = resourceLoader?.GetString("LoadingTip"),
                 Icon = new FontIcon { Glyph = "\uE895" },
                 IsEnabled = false
             };
@@ -250,7 +312,7 @@ namespace ChangeFolderIcon
             try
             {
                 List<FolderNavigationService.FolderNode> nodes =
-                    await Task.Run(() => _folderService.BuildChildNodes(folder.Path));
+                    await Task.Run(() => _folderService != null ? _folderService.BuildChildNodes(folder.Path) : new List<FolderNavigationService.FolderNode>());
 
                 NavView.MenuItems.Clear();
                 PopulateNavView(nodes, NavView.MenuItems);
@@ -260,7 +322,7 @@ namespace ChangeFolderIcon
                 NavView.MenuItems.Clear();
                 var errorItem = new NavigationViewItem
                 {
-                    Content = resourceLoader.GetString("LoadFailedTip") + ": " + ex.Message,
+                    Content = resourceLoader?.GetString("LoadFailedTip") + ": " + ex.Message,
                     Icon = new FontIcon { Glyph = "\uE783" },
                     IsEnabled = false
                 };
@@ -300,7 +362,7 @@ namespace ChangeFolderIcon
             NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
             string? path = (args.SelectedItemContainer as NavigationViewItem)?.Tag as string;
-            _iconsPage.UpdateState(path);
+            _iconsPage?.UpdateState(path);
         }
         #endregion
 

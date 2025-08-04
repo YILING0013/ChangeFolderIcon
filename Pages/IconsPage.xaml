@@ -97,8 +97,34 @@
                 </muxc:GridView.ItemsPanel>
             </muxc:GridView>
 
+            <!-- 当图标库缺失时显示的覆盖层 -->
+            <Grid x:Name="MissingIconsOverlay"
+                  Grid.ColumnSpan="2"
+                  Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                  Visibility="Collapsed">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                    <FontIcon Glyph="&#xE783;" FontSize="48" HorizontalAlignment="Center"/>
+                    <TextBlock x:Uid="IconPackMissingTitle" 
+                               Text="未找到图标包" 
+                               Style="{ThemeResource SubtitleTextBlockStyle}" 
+                               HorizontalAlignment="Center"/>
+                    <TextBlock x:Uid="IconPackMissingContent" 
+                               Text="无法加载图标包。请在设置中更新或手动选择文件夹。" 
+                               TextWrapping="Wrap" 
+                               MaxWidth="300" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center"/>
+                    <Button x:Name="GoToSettingsButton" 
+                            x:Uid="GoToSettings" 
+                            Content="前往设置" 
+                            HorizontalAlignment="Center"
+                            Click="GoToSettingsButton_Click"/>
+                </StackPanel>
+            </Grid>
+
             <!-- 字母索引导航栏 -->
-            <Border Grid.Column="1"
+            <Border x:Name="AlphabetIndexBorder"
+                    Grid.Column="1"
                     Width="32"
                     Margin="4,8,8,8"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

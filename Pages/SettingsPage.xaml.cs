@@ -1,18 +1,11 @@
-using ChangeFolderIcon.Utils.Services;
+﻿using ChangeFolderIcon.Utils.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.Windows.ApplicationModel.Resources;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 
 namespace ChangeFolderIcon.Pages
 {
@@ -21,6 +14,10 @@ namespace ChangeFolderIcon.Pages
         private readonly SettingsService? _settingsService;
         private readonly IconPackService? _iconPackService;
         private bool _isInitializing = true;
+        private readonly ResourceLoader resourceLoader = new();
+
+        // 当图标包路径改变时触发的事件
+        public event EventHandler? IconPackPathChanged;
 
         public SettingsPage()
         {
@@ -47,15 +44,29 @@ namespace ChangeFolderIcon.Pages
 
             // Theme
             var currentTheme = _settingsService?.Settings.Theme;
-            ThemeRadioButtons.SelectedItem = ThemeRadioButtons.Items
-                .Cast<RadioButton>()
-                .FirstOrDefault(rb => (string)rb.Tag == currentTheme) ?? ThemeRadioButtons.Items[2];
+            ThemeComboBox.SelectedItem = ThemeComboBox.Items
+                .Cast<ComboBoxItem>()
+                .FirstOrDefault(item => (string)item.Tag == currentTheme) ?? ThemeComboBox.Items[2];
 
             // Backdrop
             var currentBackdrop = _settingsService?.Settings.Backdrop;
-            BackdropRadioButtons.SelectedItem = BackdropRadioButtons.Items
-                .Cast<RadioButton>()
-                .FirstOrDefault(rb => (string)rb.Tag == currentBackdrop) ?? BackdropRadioButtons.Items[0];
+            BackdropComboBox.SelectedItem = BackdropComboBox.Items
+                .Cast<ComboBoxItem>()
+                .FirstOrDefault(item => (string)item.Tag == currentBackdrop) ?? BackdropComboBox.Items[0];
+
+            // Icon Pack Path
+            UpdateIconPackPathDisplay();
+        }
+
+        private void UpdateIconPackPathDisplay()
+        {
+            if (_settingsService != null)
+            {
+                // 显示当前设置的ico文件夹路径
+                string path = _settingsService.Settings.IconPackPath ?? resourceLoader.GetString("NotSet");
+                string displayPath = _settingsService.Settings.IconRepoLocalPath ?? resourceLoader.GetString("NotSet");
+                IconPackPathTextBlock.Text = $"{resourceLoader.GetString("CurrentPath")}: {displayPath}";
+            }
         }
 
         private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -78,11 +89,11 @@ namespace ChangeFolderIcon.Pages
             }
         }
 
-        private void ThemeRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isInitializing) return;
 
-            var selectedTag = ((RadioButton)ThemeRadioButtons.SelectedItem)?.Tag as string;
+            var selectedTag = ((ComboBoxItem)ThemeComboBox.SelectedItem)?.Tag as string;
             if (selectedTag != null && _settingsService != null)
             {
                 _settingsService.Settings.Theme = selectedTag;
@@ -95,11 +106,11 @@ namespace ChangeFolderIcon.Pages
             }
         }
 
-        private void BackdropRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void BackdropComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isInitializing) return;
 
-            var selectedTag = ((RadioButton)BackdropRadioButtons.SelectedItem)?.Tag as string;
+            var selectedTag = ((ComboBoxItem)BackdropComboBox.SelectedItem)?.Tag as string;
             if (selectedTag != null && _settingsService != null)
             {
                 if (App.window is MainWindow mainWindow)
@@ -113,7 +124,7 @@ namespace ChangeFolderIcon.Pages
 
         private async void UpdateIconsButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_iconPackService == null) return;
+            if (_iconPackService == null || _settingsService == null) return;
 
             UpdateIconsButton.IsEnabled = false;
             UpdateProgressRing.Visibility = Visibility.Visible;
@@ -121,7 +132,14 @@ namespace ChangeFolderIcon.Pages
 
             try
             {
-                await _iconPackService.UpdateIconPackAsync();
+                bool success = await _iconPackService.UpdateIconPackAsync();
+                if (success && _iconPackService.IconPackDirectory != null)
+                {
+                    _settingsService.Settings.IconRepoLocalPath = _iconPackService.IconPackDirectory;
+                    _settingsService.SaveSettings();
+                    UpdateIconPackPathDisplay();
+                    IconPackPathChanged?.Invoke(this, EventArgs.Empty);
+                }
             }
             catch (Exception ex)
             {
@@ -131,6 +149,27 @@ namespace ChangeFolderIcon.Pages
             {
                 UpdateIconsButton.IsEnabled = true;
                 UpdateProgressRing.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private async void SelectIconsFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new Windows.Storage.Pickers.FolderPicker
+            {
+                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Desktop
+            };
+            picker.FileTypeFilter.Add("*");
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.window);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+            var folder = await picker.PickSingleFolderAsync();
+            if (folder != null && _settingsService != null)
+            {
+                _settingsService.Settings.IconRepoLocalPath = folder.Path;
+                _settingsService.SaveSettings();
+                UpdateIconPackPathDisplay();
+                // 触发事件通知MainWindow刷新IconsPage
+                IconPackPathChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 

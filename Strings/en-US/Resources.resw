@@ -331,9 +331,9 @@
     <value>Change Folder Icon</value>
   </data>
   <data name="SettingsPage_Version.Text" xml:space="preserve">
-    <value>Version 1.0.0</value>
+    <value>Version 1.0.1</value>
   </data>
-  <data name="SettingsPage_GitHub.Content" xml:space="preserve">
+  <data name="SettingsPage_GitHub.Text" xml:space="preserve">
     <value>View on GitHub</value>
   </data>
   <data name="IconPackStatus_Checking" xml:space="preserve">
@@ -356,5 +356,32 @@
   </data>
   <data name="IconPackStatus_NoInternet" xml:space="preserve">
     <value>No internet connection</value>
+  </data>
+  <data name="IconPackMissingContent.Text" xml:space="preserve">
+    <value>Failed to load the icon pack. Please update it in settings or manually select the folder.</value>
+  </data>
+  <data name="IconPackMissingTitle.Text" xml:space="preserve">
+    <value>No icon pack found.</value>
+  </data>
+  <data name="GoToSettings.Content" xml:space="preserve">
+    <value>Go to Settings Page</value>
+  </data>
+  <data name="SettingsPage_IconPack_SelectFolder.Content" xml:space="preserve">
+    <value>Manually select icon pack folder</value>
+  </data>
+  <data name="NotSet" xml:space="preserve">
+    <value>Not Set</value>
+  </data>
+  <data name="CurrentPath" xml:space="preserve">
+    <value>Current Path</value>
+  </data>
+  <data name="SettingsPage_IconPack_Folder.Text" xml:space="preserve">
+    <value>Icon pack folder path</value>
+  </data>
+  <data name="SettingsPage_UpdateIconsButton.Content" xml:space="preserve">
+    <value>Check for Updates</value>
+  </data>
+  <data name="SettingsPage_Appearance_and_behavior.Text" xml:space="preserve">
+    <value>Appearance &amp;amp; behavior</value>
   </data>
 </root>

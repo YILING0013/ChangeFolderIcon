@@ -10,7 +10,8 @@
     <SplashScreenSource>E:\Visual_Studio_project\ChangeFolderIcon\Assets\icon\microsoft_windows_11.png</SplashScreenSource>
     <PackageLogoSource>E:\Visual_Studio_project\ChangeFolderIcon\Assets\icon\microsoft_windows_11.png</PackageLogoSource>
     <BadgeLogoSource>E:\Visual_Studio_project\ChangeFolderIcon\Assets\icon\microsoft_windows_11.png</BadgeLogoSource>
-    <ActiveDebugProfile>ChangeFolderIcon (Package)</ActiveDebugProfile>
+    <ActiveDebugProfile>ChangeFolderIcon (Unpackaged)</ActiveDebugProfile>
+    <_LastSelectedProfileId>E:\Visual_Studio_project\ChangeFolderIcon\Properties\PublishProfiles\win-arm64.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>

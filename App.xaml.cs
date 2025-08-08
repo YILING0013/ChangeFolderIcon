@@ -33,8 +33,6 @@ namespace ChangeFolderIcon
             InitializeComponent();
             SettingsService = new SettingsService();
             IconPackService = new IconPackService(SettingsService.Settings.IconPackRepo, SettingsService.Settings.IconRepoLocalPath);
-
-            ApplyLanguageSetting();
         }
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
@@ -44,15 +42,6 @@ namespace ChangeFolderIcon
             ApplyThemeAndBackdropSetting();
             _ = IconPackService?.UpdateIconPackAsync();
             window.Activate();
-        }
-
-        private void ApplyLanguageSetting()
-        {
-            if (SettingsService == null)
-            {
-                throw new InvalidOperationException("SettingsService is not initialized.");
-            }
-            LanguageService.SetLanguage(SettingsService.Settings.Language);
         }
 
         private void ApplyThemeAndBackdropSetting()

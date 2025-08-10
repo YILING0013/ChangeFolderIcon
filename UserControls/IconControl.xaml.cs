@@ -150,6 +150,7 @@ namespace ChangeFolderIcon.UserControls
                 {
                     try
                     {
+                        // 使用此控件自身的图标来应用
                         IconManager.SetFolderIcon(folder.Path, iconPath);
                         ok++;
                     }

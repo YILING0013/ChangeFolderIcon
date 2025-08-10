@@ -2,10 +2,13 @@ using ChangeFolderIcon.Models;
 using ChangeFolderIcon.Utils.WindowsAPI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.Windows.ApplicationModel.Resources;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 
@@ -113,14 +116,17 @@ namespace ChangeFolderIcon.UserControls
             DragOverlay.Visibility = Visibility.Collapsed;
             UnhoverStoryboard.Begin();
 
-            if (Icon == null) return;
-            if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
+            if (Icon == null)
+                return;
+            if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+                return;
 
             // 获取被拖入的项目
             var items = await e.DataView.GetStorageItemsAsync();
             // 筛选出其中的文件夹
             var folders = items.OfType<StorageFolder>().ToList();
-            if (folders.Count == 0) return;
+            if (folders.Count == 0)
+                return;
 
             // 创建进度对话框
             var progressDialog = new ContentDialog
@@ -135,21 +141,27 @@ namespace ChangeFolderIcon.UserControls
             // 显示进度对话框
             var dialogTask = progressDialog.ShowAsync();
 
-            int ok = 0, fail = 0;
-            // 遍历所有被拖入的文件夹
-            foreach (var f in folders)
+            // 在 UI 线程读取图标路径
+            string iconPath = Icon.FullPath;
+
+            // 使用非 UI 线程运行图标设置逻辑
+            var (ok, fail) = await Task.Run(() =>
             {
-                try
+                int ok = 0, fail = 0;
+
+                foreach (var folder in folders)
                 {
-                    // 使用此控件自身的图标来应用
-                    IconManager.SetFolderIcon(f.Path, Icon.FullPath);
-                    ok++;
+                    try
+                    {
+                        IconManager.SetFolderIcon(folder.Path, iconPath);
+                        ok++;
+                    } catch
+                    {
+                        fail++;
+                    }
                 }
-                catch
-                {
-                    fail++;
-                }
-            }
+                return (ok, fail);
+            });
 
             // 关闭进度对话框
             progressDialog.Hide();
@@ -172,13 +184,12 @@ namespace ChangeFolderIcon.UserControls
                         new SymbolIcon { Symbol = Symbol.Accept },
                         new TextBlock
                         {
-                            Text = resourceLoader.GetString("SuccessfullyAppliedTip_1") + ok + resourceLoader.GetString("SuccessfullyAppliedTip_2"),
+                            Text = resourceLoader.GetString("SuccessfullyAppliedTip_1") + ok + " " + resourceLoader.GetString("SuccessfullyAppliedTip_2"),
                             HorizontalAlignment = HorizontalAlignment.Center
                         }
                     }
                 };
-            }
-            else
+            } else
             {
                 resultDialog.Content = new StackPanel
                 {

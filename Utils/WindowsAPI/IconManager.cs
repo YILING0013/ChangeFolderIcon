@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ChangeFolderIcon.Utils.WindowsAPI
 {
@@ -139,6 +140,19 @@ namespace ChangeFolderIcon.Utils.WindowsAPI
         }
 
         /// <summary>
+        /// 异步为单个文件夹设置图标，采用多种策略确保立即刷新
+        /// </summary>
+        /// <param name="folderPath">目标文件夹的完整路径</param>
+        /// <param name="iconPath">图标文件的完整路径 (.ico)</param>
+        public static Task SetFolderIconAsync(string folderPath, string iconPath)
+        {
+            return Task.Run(() =>
+            {
+                SetFolderIcon(folderPath, iconPath);
+            });
+        }
+
+        /// <summary>
         /// 删除/重置单个文件夹的自定义图标
         /// </summary>
         /// <param name="folderPath">目标文件夹路径</param>
@@ -170,6 +184,17 @@ namespace ChangeFolderIcon.Utils.WindowsAPI
         }
 
         /// <summary>
+        /// 异步删除/重置单个文件夹的自定义图标
+        /// </summary>
+        /// <param name="folderPath">目标文件夹路径</param>
+        public static Task ClearFolderIconAsync(string folderPath)
+        {
+            return Task.Run(() => {
+                ClearFolderIcon(folderPath);
+            });
+        }
+
+        /// <summary>
         /// 递归地为指定文件夹下的所有子文件夹应用图标
         /// </summary>
         public static int ApplyIconToAllSubfolders(string rootFolderPath, string iconPath)
@@ -194,6 +219,16 @@ namespace ChangeFolderIcon.Utils.WindowsAPI
         }
 
         /// <summary>
+        /// 异步递归地为指定文件夹下的所有子文件夹应用图标
+        /// </summary>
+        public static Task<int> ApplyIconToAllSubfoldersAsync(string rootFolderPath, string iconPath)
+        {
+            return Task.Run(() => {
+                return ApplyIconToAllSubfolders(rootFolderPath, iconPath);
+            });
+        }
+
+        /// <summary>
         /// 递归地清除指定文件夹及其所有子文件夹的自定义图标
         /// </summary>
         public static int ClearIconRecursively(string rootFolderPath)
@@ -213,6 +248,15 @@ namespace ChangeFolderIcon.Utils.WindowsAPI
             return count;
         }
 
+        /// <summary>
+        /// 异步递归地清除指定文件夹及其所有子文件夹的自定义图标
+        /// </summary>
+        public static Task<int> ClearIconRecursivelyAsync(string rootFolderPath)
+        {
+            return Task.Run(() => {
+                return ClearIconRecursively(rootFolderPath);
+            });
+        }
 
         /// <summary>
         /// 多层次的通知以确保 Explorer 图标被刷新

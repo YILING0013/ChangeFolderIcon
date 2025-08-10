@@ -205,7 +205,10 @@ namespace ChangeFolderIcon.Pages
             if (!CheckPreCondition()) return;
             try
             {
-                IconManager.SetFolderIcon(_selectedFolderPath!, _selectedIcon!.FullPath);
+                var progressDialog = ProgressDialog();
+                _ = progressDialog.ShowAsync();
+                await IconManager.SetFolderIconAsync(_selectedFolderPath!, _selectedIcon!.FullPath);
+                progressDialog.Hide();
                 IconChanged?.Invoke(this, new IconChangedEventArgs(_selectedFolderPath!, _selectedIcon.FullPath));
                 await ShowMsg(resourceLoader.GetString("Done"), resourceLoader.GetString("AppliedFolder"));
             }
@@ -218,7 +221,7 @@ namespace ChangeFolderIcon.Pages
             { await ShowMsg(resourceLoader.GetString("Note"), resourceLoader.GetString("SelectTargetFolder")); return; }
             try
             {
-                IconManager.ClearFolderIcon(_selectedFolderPath!);
+                await IconManager.ClearFolderIconAsync(_selectedFolderPath!);
                 IconChanged?.Invoke(this, new IconChangedEventArgs(_selectedFolderPath!, null));
                 await ShowMsg(resourceLoader.GetString("Done"), resourceLoader.GetString("clearedFolder"));
             }
@@ -230,7 +233,10 @@ namespace ChangeFolderIcon.Pages
         private async void ApplyAllButton_Click(object sender, RoutedEventArgs e)
         {
             if (!CheckPreCondition()) return;
-            int count = IconManager.ApplyIconToAllSubfolders(_selectedFolderPath!, _selectedIcon!.FullPath);
+            var progressDialog = ProgressDialog();
+            _ = progressDialog.ShowAsync();
+            int count = await IconManager.ApplyIconToAllSubfoldersAsync(_selectedFolderPath!, _selectedIcon!.FullPath);
+            progressDialog.Hide();
             RaiseForAllSubFolders(_selectedFolderPath!, _selectedIcon!.FullPath);
             await ShowMsg(resourceLoader.GetString("Done"), resourceLoader.GetString("clearedFolderText_1") + count + resourceLoader.GetString("clearedFolderText_2"));
         }
@@ -239,7 +245,7 @@ namespace ChangeFolderIcon.Pages
         {
             if (string.IsNullOrEmpty(_selectedFolderPath))
             { await ShowMsg(resourceLoader.GetString("Note"), resourceLoader.GetString("SelectTargetFolderFirst")); return; }
-            int count = IconManager.ClearIconRecursively(_selectedFolderPath!);
+            int count = await IconManager.ClearIconRecursivelyAsync(_selectedFolderPath!);
             RaiseForAllSubFolders(_selectedFolderPath!, null);
             await ShowMsg(resourceLoader.GetString("Done"), resourceLoader.GetString("clearedFoldersText_1") + count + resourceLoader.GetString("clearedFoldersText_2"));
         }
@@ -270,7 +276,17 @@ namespace ChangeFolderIcon.Pages
                 XamlRoot = App.window?.Content.XamlRoot
             }.ShowAsync();
 
-        private void RaiseForAllSubFolders(string root, string? iconPath)
+        private static ContentDialog ProgressDialog() =>
+            new ContentDialog
+            {
+                Title = new ResourceLoader().GetString("ApplyingIcons"),
+                Content = new ProgressRing { IsActive = true },
+                XamlRoot = App.window?.Content.XamlRoot,
+                IsPrimaryButtonEnabled = false,
+                IsSecondaryButtonEnabled = false
+            };
+
+    private void RaiseForAllSubFolders(string root, string? iconPath)
         {
             IconChanged?.Invoke(this, new IconChangedEventArgs(root, iconPath));
             foreach (string dir in Directory.EnumerateDirectories(root, "*", SearchOption.AllDirectories))

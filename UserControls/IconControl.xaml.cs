@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
+using System.Threading.Tasks;
 
 namespace ChangeFolderIcon.UserControls
 {
@@ -135,22 +136,27 @@ namespace ChangeFolderIcon.UserControls
             // 显示进度对话框
             var dialogTask = progressDialog.ShowAsync();
 
-            int ok = 0, fail = 0;
-            // 遍历所有被拖入的文件夹
-            foreach (var f in folders)
+            //使用非UI线程运行图标设置逻辑
+            string iconFullPath = Icon.FullPath;
+            var (ok, fail) = await Task.Run(async () =>
             {
-                try
-                {
-                    // 使用此控件自身的图标来应用
-                    IconManager.SetFolderIcon(f.Path, Icon.FullPath);
-                    ok++;
-                }
-                catch
-                {
-                    fail++;
-                }
-            }
+                int ok = 0, fail = 0;
 
+                // 遍历所有被拖入的文件夹
+                foreach (var f in folders)
+                {
+                    try
+                    {
+                        // 使用此控件自身的图标来应用
+                        await IconManager.SetFolderIconAsync(f.Path, iconFullPath);
+                        ok++;
+                    } catch
+                    {
+                        fail++;
+                    }
+                }
+                return (ok, fail);
+            });
             // 关闭进度对话框
             progressDialog.Hide();
 

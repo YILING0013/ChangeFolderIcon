@@ -116,17 +116,14 @@ namespace ChangeFolderIcon.UserControls
             DragOverlay.Visibility = Visibility.Collapsed;
             UnhoverStoryboard.Begin();
 
-            if (Icon == null)
-                return;
-            if (!e.DataView.Contains(StandardDataFormats.StorageItems))
-                return;
+            if (Icon == null) return;
+            if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
 
             // 获取被拖入的项目
             var items = await e.DataView.GetStorageItemsAsync();
             // 筛选出其中的文件夹
             var folders = items.OfType<StorageFolder>().ToList();
-            if (folders.Count == 0)
-                return;
+            if (folders.Count == 0) return;
 
             // 创建进度对话框
             var progressDialog = new ContentDialog
@@ -155,7 +152,8 @@ namespace ChangeFolderIcon.UserControls
                     {
                         IconManager.SetFolderIcon(folder.Path, iconPath);
                         ok++;
-                    } catch
+                    }
+                    catch
                     {
                         fail++;
                     }
@@ -189,7 +187,8 @@ namespace ChangeFolderIcon.UserControls
                         }
                     }
                 };
-            } else
+            }
+            else
             {
                 resultDialog.Content = new StackPanel
                 {

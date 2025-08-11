@@ -25,7 +25,8 @@
 - [ ] 打开`ChangeFolderIcon`文件夹内的`ChangeFolderIcon.sln`
 - [ ] 在` Visual Studio` 中右键解决方案 → 还原 `NuGet` 包
 - [ ] 按 `Ctrl+Shift+B` 或菜单栏 **生成** → **生成解决方案**
-- [ ] 按 `F5` 启动调试，或 `Ctrl+F5` 无调试启动
+- [ ] 右键`ElevatedWorker` 项目->发布，点击发布按钮
+- [ ] 选择`ChangeFolderIcon`项目，按 `F5` 启动调试，或 `Ctrl+F5` 无调试启动
 
 ### 注意事项
 - 确保您的系统为 Windows 10 或更高版本。

@@ -25,7 +25,8 @@
 - [ ] Open `ChangeFolderIcon.sln` inside the `ChangeFolderIcon` folder.  
 - [ ] In **Visual Studio**, right-click the solution → **Restore NuGet Packages**.  
 - [ ] Press `Ctrl+Shift+B` or go to **Build** → **Build Solution**.  
-- [ ] Press `F5` to debug or `Ctrl+F5` to run without debugging.  
+- [ ] right-click `ElevatedWorker` project → **Publish**. Click the **Publish** button.  
+- [ ] Select `ChangeFolderIcon` project, press `F5` to start debugging, or `Ctrl+F5` to start without debugging.
 
 ### Notes  
 - Requires **Windows 10 or later**.  

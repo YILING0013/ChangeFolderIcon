@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChangeFolderIcon.Utils.WindowsAPI
+namespace ElevatedWorker.WindowsAPI
 {
     /// <summary>
     ///在文件夹上设置自定义图标的工具类

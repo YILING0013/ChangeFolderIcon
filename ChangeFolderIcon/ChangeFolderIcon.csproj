@@ -20,13 +20,9 @@
     <Content Remove="Assets\Images\1_zh-cn.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Pages\SettingsPage.xaml" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Assets\icon\app_icon.ico" />
 	<Content Include="Assets\icon\default.ico" />
   </ItemGroup>
-
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
@@ -38,6 +34,11 @@
   -->
   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <ProjectCapability Include="Msix" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\ElevatedWorker\bin\Release\Publish\ElevatedWorker.exe" Link="ElevatedWorker.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp" Version="0.31.0" />

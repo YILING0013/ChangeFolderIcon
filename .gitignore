@@ -1,5 +1,6 @@
 /.vs
-/Assets/ico
-/bin
-/obj
 /Output
+/ChangeFolderIcon/bin
+/ChangeFolderIcon/obj
+/ElevatedWorker/bin
+/ElevatedWorker/obj

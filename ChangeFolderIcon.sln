@@ -1,9 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36301.6 d17.14
+VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChangeFolderIcon", "ChangeFolderIcon.csproj", "{B0047555-34AA-4500-92EF-418C66078372}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChangeFolderIcon", "ChangeFolderIcon\ChangeFolderIcon.csproj", "{B0047555-34AA-4500-92EF-418C66078372}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E8459169-620E-4EFC-AA5F-03319FC275C3} = {E8459169-620E-4EFC-AA5F-03319FC275C3}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatedWorker", "ElevatedWorker\ElevatedWorker.csproj", "{E8459169-620E-4EFC-AA5F-03319FC275C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +38,18 @@ Global
 		{B0047555-34AA-4500-92EF-418C66078372}.Release|x86.ActiveCfg = Release|x86
 		{B0047555-34AA-4500-92EF-418C66078372}.Release|x86.Build.0 = Release|x86
 		{B0047555-34AA-4500-92EF-418C66078372}.Release|x86.Deploy.0 = Release|x86
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Debug|x64.Build.0 = Debug|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Debug|x86.Build.0 = Debug|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Release|ARM64.Build.0 = Release|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Release|x64.ActiveCfg = Release|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Release|x64.Build.0 = Release|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Release|x86.ActiveCfg = Release|Any CPU
+		{E8459169-620E-4EFC-AA5F-03319FC275C3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

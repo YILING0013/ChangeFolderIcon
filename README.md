@@ -8,7 +8,7 @@
 
 ### 预览图:
 
-![](./Assets/Images/1_zh-cn.png)
+![](./ChangeFolderIcon/Assets/Images/1_zh-cn.png)
 
 ## 从源码构建
 

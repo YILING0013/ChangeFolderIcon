@@ -8,7 +8,7 @@
 
 ### Preview:  
 
-![](./Assets/Images/1_en-us.png)  
+![](./ChangeFolderIcon/Assets/Images/1_en-us.png)  
 
 ## Build from Source  
 
